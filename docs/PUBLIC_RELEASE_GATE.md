@@ -1,26 +1,33 @@
-# Public release gate — privacy and source history
+# KhaiBuilds public release gate
 
-**Status:** NOT APPROVED FOR PUBLIC VISIBILITY. Completing normal PR review does not mean the Git history is privacy-safe.
+**Status: PRIVATE — publication and production cutover are NOT approved.**
 
-## Two independent release decisions
+## Source and provenance
 
-1. The Owner authorized publication of only the reviewed 9×9 Foundation verifier vendored in this repository. The upstream Foundation repository stays Private.
-2. The Owner chose **GitHub noreply** author identity and removal of old commit-email metadata from any repository intended to become Public.
+- This is a new KhaiBuilds repository with a clean initial commit, created independently of the private 9×9 code repositories.
+- The current website source is an exact **32-file snapshot** imported without its previous `.git` history, pull requests, tags or branches.
+- Imported source tree SHA (before this candidate's release-gate CI update): `b4023dbd16c67d49bc93853b0cad27bf2e6dfc78`.
+- The original private archive is retained separately. **Never transfer/fork/merge Git histories from it.**
+- The Owner approved publishing only the vendored verifier `.github/foundation/verify.mjs` from 9×9 Foundation. The upstream Foundation repository remains Private. See `.github/foundation/README.md` for provenance and scope.
 
-## Required actions before changing visibility
+## Author identity gate
 
-1. On the KhaiBuilds GitHub account, enable **Settings → Emails → Keep my email addresses private** and verify the account-provided noreply address. For recent accounts this normally has the form `ID+USERNAME@users.noreply.github.com`. Configure any local Git author identities accordingly. ChatGPT's connected GitHub operations do not currently expose the account-email setting.
-2. The current private repository's Git history includes commits authored with the account's Gmail address. **Adding a new commit, a `.mailmap`, or merging a normal PR will not remove the original metadata.**
-3. A force-pushed rewrite is **not sufficient assurance** for this repo, because its prior pull requests can retain references to the old commits. Safest path: keep this repo **Private** as an archive, and create a truly fresh repository/history for the Public release. If preserving the exact `KhaiBuilds/khaibuilds-web` name is necessary, the Owner can first rename this Private repo to an archive name, then create a new empty Private repo under the desired name. Keep Cloudflare production separate until its dedicated approved migration.
-4. Import only the approved working-tree files to the new clean repository with the confirmed noreply author identity; do **not** fork, transfer, merge histories, or copy `.git`.
-5. Use `node scripts/public-history-gate.mjs` in a **complete, unshallow local clone with all branch/tag refs fetched**. It must PASS; independently inspect GitHub's commit history and PR references. A local log scan cannot prove absence of deleted, hidden, cached, or GitHub PR references.
-6. Run Foundation check, `npm audit --audit-level=high`, build and live-preview QA on the new repository. Set and verify its `main` branch protections/required status checks when eligible. Request a separate, explicit Owner approval before making it Public.
+GitHub confirmed that commits made via the KhaiBuilds connection now use
+`318708838+khaibuilds@users.noreply.github.com`.
+The initial repository commit and candidate import must independently satisfy this requirement; neither the original Gmail author identity nor its legacy commit history may appear in this Public candidate.
 
-**Never make this existing repository Public merely because the CI/self-tests are green.** Public visibility and production cutover are distinct approval gates.
+The `scripts/public-history-gate.mjs` utility checks all **locally reachable** commits for exact expected author email, and GitHub noreply committer metadata. This repo's CI checks out **full history** (`fetch-depth: 0`), runs self-tests and the actual history audit. A green workflow is necessary, not sufficient, for publication: also inspect GitHub PR refs and repository history before authorizing Public.
 
-## Why a fresh history is safer
+**Do not rely on a normal PR merge, future email settings or `.mailmap` to erase an old author's address.**
 
-GitHub documents that history rewrites can leave old commits accessible through cached SHA references and pull requests. Treat an old-repository rewrite as a specialist operation requiring an explicit plan, not a normal mergeable PR.
+## Owner-controlled publication checklist
 
-- GitHub Docs: https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/removing-sensitive-data-from-a-repository
-- GitHub Docs: https://docs.github.com/en/account-and-profile/concepts/email-addresses
+- [ ] New candidate PR: Foundation CI PASS at the exact HEAD commit, including `npm audit --audit-level=high`, Astro checks, output allowlist, history self-test and full history audit.
+- [ ] Owner approves merge to this repository's `main` while it remains Private.
+- [ ] After merge, GitHub CI PASS on `main`; independently verify all main ancestor commit author/committer emails and check PR references for legacy history.
+- [ ] Review all Public-facing content and confirm no confidential docs, keys, internal admin addresses or unreleased plans are present.
+- [ ] Configure and verify the GitHub Public repo's `main` branch protection (required status checks, PR reviews, no force-push), using an Owner-authorized change.
+- [ ] Owner separately approves **Private → Public**; never treat a merge approval as visibility approval.
+- [ ] Cloudflare source migration, preview testing, DNS/production cutover and rollback require a separate later Owner approval. The existing production source is unchanged.
+
+The public project documents implementation work, not an externally certified security audit or a paid-client delivery. This repository does not grant an open-source license unless one is separately added.
