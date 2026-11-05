@@ -1,0 +1,49 @@
+{
+  "schema": "9x9.foundation.toolkit.v1",
+  "profile": "static-web",
+  "dependency_mode": "npm-lock",
+  "artifact_dir": "dist",
+  "allowed_outputs": [
+    "_headers",
+    "lang.js",
+    "404.html",
+    "favicon.svg",
+    "robots.txt",
+    "sitemap.xml",
+    "_astro/**",
+    "index.html",
+    "vi/index.html",
+    "services/index.html",
+    "vi/services/index.html",
+    "projects/index.html",
+    "vi/projects/index.html",
+    "domains/index.html",
+    "vi/domains/index.html",
+    "about/index.html",
+    "vi/about/index.html",
+    "collaborate/index.html",
+    "vi/collaborate/index.html",
+    "contact/index.html",
+    "vi/contact/index.html",
+    "privacy/index.html",
+    "vi/privacy/index.html",
+    "terms/index.html",
+    "vi/terms/index.html",
+    "services/personal-websites/index.html",
+    "vi/services/personal-websites/index.html",
+    "services/android-apps/index.html",
+    "vi/services/android-apps/index.html"
+  ],
+  "commands": {
+    "build": [
+      "npm",
+      "run",
+      "build"
+    ],
+    "test": [
+      "npm",
+      "run",
+      "check"
+    ]
+  }
+}

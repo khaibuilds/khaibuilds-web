@@ -1,0 +1,5 @@
+# Production: public pages may be indexed. Draft legal notices use per-page noindex.
+User-agent: *
+Allow: /
+
+Sitemap: https://khaibuilds.com/sitemap.xml

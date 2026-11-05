@@ -1,0 +1,277 @@
+name: Foundation checks
+
+on:
+  push:
+    branches: [main, foundation-v1]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Astro check and build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "22"
+      - name: Install reproducible dependency graph
+        run: npm ci --no-audit --no-fund
+      - name: Audit dependencies for high-severity advisories
+        run: npm audit --audit-level=high
+      - name: Test public-history privacy gate (non-destructive)
+        run: node scripts/public-history-gate.mjs --self-test
+      - name: Verify complete clean Git author and committer history
+        run: node scripts/public-history-gate.mjs
+      - name: Astro type check (diagnostic output)
+        run: npm run check
+      - name: Foundation Static Web (pinned toolkit, exact SHA, artifact inventory)
+        shell: bash
+        env:
+          EXACT_SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$EXACT_SOURCE_SHA"
+          test "$(git hash-object .github/foundation/verify.mjs)" = "9030150bf2544fa7d64c1aef31d7b0bc45893824"
+          node .github/foundation/verify.mjs verify \
+            --root "$GITHUB_WORKSPACE" \
+            --expected-sha "$EXACT_SOURCE_SHA" \
+            --config .github/foundation/foundation.config.json \
+            --report .foundation/evidence.json
+          node .github/foundation/verify.mjs check \
+            --root "$GITHUB_WORKSPACE" \
+            --expected-sha "$EXACT_SOURCE_SHA" \
+            --config .github/foundation/foundation.config.json \
+            --report .foundation/artifact-evidence.json
+      - name: Preserve Foundation QA receipts
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: khaibuilds-foundation-${{ github.event.pull_request.head.sha || github.sha }}
+          path: .foundation/*.json
+          if-no-files-found: warn
+          include-hidden-files: true
+          retention-days: 7
+      - name: Verify three-pillar pages and both languages
+        run: |
+          set -eu
+          for route in             index             services/index             services/personal-websites/index             services/android-apps/index             domains/index             projects/index             contact/index             vi/index             vi/services/index             vi/services/personal-websites/index             vi/services/android-apps/index             vi/domains/index             vi/projects/index             vi/contact/index; do
+            test -f "dist/$route.html" || { echo "Missing: dist/$route.html"; exit 1; }
+          done
+      - name: Verify 404, favicon, OG URL and contact copy actions
+        run: |
+          set -eu
+          test -f "dist/404.html"
+          test -f "dist/favicon.svg"
+          grep -q 'noindex,follow' dist/404.html
+          grep -q 'Page not found' dist/404.html
+          grep -q 'Không tìm thấy trang' dist/404.html
+          for prefix in "" "vi/"; do
+            grep -q 'property="og:url"' "dist/${prefix}index.html"
+            grep -q 'href="/favicon.svg"' "dist/${prefix}index.html"
+            grep -q 'data-copy-email=' "dist/${prefix}contact/index.html"
+          done
+
+      - name: Verify production robots and draft legal indexing controls
+        run: |
+          set -eu
+          grep -q 'index,follow' dist/index.html
+          grep -q 'index,follow' dist/vi/index.html
+          grep -q 'Allow: /' dist/robots.txt
+          if grep -q 'Disallow: /' dist/robots.txt; then echo "Production robots blocked"; exit 1; fi
+          grep -q 'noindex,follow' dist/privacy/index.html
+          grep -q 'noindex,follow' dist/vi/privacy/index.html
+          grep -q 'noindex,follow' dist/terms/index.html
+          grep -q 'noindex,follow' dist/vi/terms/index.html
+          grep -q 'https://khaibuilds.com/vi/domains/' dist/sitemap.xml
+      - name: Reject unpublished service routes and check portfolio identity
+        run: |
+          set -eu
+          test ! -e dist/services/video-editing/index.html
+          test ! -e dist/vi/services/video-editing/index.html
+          test ! -e dist/services/local-business/index.html
+          test ! -e dist/vi/services/local-business/index.html
+          grep -q 'Building ideas into digital assets' dist/index.html
+          if grep -q 'portfolio-pending' dist/index.html; then echo 'No empty portfolio notice on homepage'; exit 1; fi
+          if grep -q 'portfolio-empty' dist/index.html; then echo 'Empty portfolio should not occupy a large homepage block'; exit 1; fi
+          grep -q 'href="/projects/"' dist/index.html
+          grep -q 'index,follow' dist/services/personal-websites/index.html
+          grep -q 'index,follow' dist/vi/services/android-apps/index.html
+      - name: Verify rendered service details are not hub pages
+        run: |
+          set -eu
+          grep -q 'A simple website for your work' dist/services/personal-websites/index.html
+          grep -q 'Typically included' dist/services/personal-websites/index.html
+          grep -q 'An Android app for a specific task' dist/services/android-apps/index.html
+          grep -q 'Local data storage where suitable' dist/services/android-apps/index.html
+          grep -q 'Ứng dụng Android cho một nhu cầu cụ thể' dist/vi/services/android-apps/index.html
+          grep -q 'Thường bao gồm' dist/vi/services/personal-websites/index.html
+          if grep -q 'Three focused ways to work together' dist/services/android-apps/index.html; then exit 1; fi
+      - name: Verify contact email on EN/VI and unique footer
+        run: |
+          set -eu
+          for locale in "" "vi/"; do
+            page="dist/${locale}contact/index.html"
+            home="dist/${locale}index.html"
+            grep -q 'mailto:hi@khaibuilds.com' "$page"
+            grep -q 'hi@khaibuilds.com' "$home"
+            grep -q 'contact-panel' "$page"
+            if grep -q 'portfolio-pending' "$home"; then echo 'Unexpected portfolio placeholder on homepage'; exit 1; fi
+            if grep -q '<form' "$page"; then echo "Unexpected form in $page"; exit 1; fi
+            n=$(grep -o '<footer' "$home" | wc -l)
+            if [ "$n" -ne 1 ]; then echo "Expected one footer in $home, found $n"; exit 1; fi
+          done
+          grep -q 'Send an inquiry' dist/services/personal-websites/index.html
+          grep -q 'Gửi yêu cầu' dist/vi/services/android-apps/index.html
+          grep -q 'mailto:hi@khaibuilds.com' dist/services/personal-websites/index.html
+          grep -q 'mailto:hi@khaibuilds.com' dist/vi/services/android-apps/index.html
+          grep -q 'mailto:hi@khaibuilds.com' dist/domains/index.html
+          grep -q 'mailto:hi@khaibuilds.com' dist/vi/domains/index.html
+          grep -q 'hi@khaibuilds.com' dist/privacy/index.html
+          grep -q 'hi@khaibuilds.com' dist/vi/privacy/index.html
+          grep -q 'Start with the essentials' dist/contact/index.html
+          grep -q 'Chia sẻ nhu cầu của bạn' dist/vi/contact/index.html
+          if grep -q 'Contact is being configured' dist/contact/index.html; then exit 1; fi
+
+      - name: Verify header and footer navigation remain distinct across EN/VI pages
+        run: |
+          node --input-type=module <<'NODE'
+          import { readFileSync } from "node:fs";
+          import assert from "node:assert/strict";
+          for (const prefix of ["", "vi/"]) {
+            for (const route of ["", "services/", "domains/", "contact/"]) {
+              const html = readFileSync(`dist/${prefix}${route}index.html`, "utf8");
+              const header = html.split("<header")[1]?.split("</header>")[0];
+              const footer = html.split("<footer")[1]?.split("</footer>")[0];
+              assert(header && footer, `Missing header/footer: ${prefix}${route}`);
+              for (const path of ["services/", "projects/", "domains/", "about/", "contact/"]) {
+                assert(header.includes(`href="/${prefix}${path}"`), `Header missing ${path}: ${prefix}${route}`);
+              }
+              const actual = Array.from(footer.matchAll(/href="([^"]+)"/g), match => match[1]).sort();
+              const expected = ["mailto:hi@khaibuilds.com", `/${prefix}privacy/`, `/${prefix}terms/`].sort();
+              assert.deepEqual(actual, expected, `Footer links duplicated or missing: ${prefix}${route}`);
+              assert(!footer.includes("Building ideas into digital assets."), `Repeated Hero tagline in footer: ${prefix}${route}`);
+              assert(footer.includes("KhaiBuilds"), `Footer brand missing: ${prefix}${route}`);
+            }
+          }
+          NODE
+
+      - name: Editorial QA EN/VI — clarity and brand consistency
+        run: |
+          set -eu
+          grep -q 'KhaiBuilds develops personal websites and simple Android apps' dist/index.html
+          grep -q 'KhaiBuilds phát triển website cá nhân' dist/vi/index.html
+          grep -q 'Services &amp; domains' dist/index.html
+          grep -q 'Dịch vụ &amp; tên miền' dist/vi/index.html
+          grep -q 'How service projects work' dist/services/index.html
+          grep -q 'Quy trình triển khai dịch vụ' dist/vi/services/index.html
+          grep -q 'Website cá nhân, gọn và rõ' dist/vi/services/personal-websites/index.html
+          grep -q 'Small builds for specific needs' dist/services/index.html
+          grep -q 'Giải pháp gọn cho nhu cầu cụ thể' dist/vi/services/index.html
+          grep -q 'Have something in mind' dist/contact/index.html
+          grep -q 'Bạn đang có ý tưởng gì' dist/vi/contact/index.html
+          if grep -q 'Làm có mục đích và giới thiệu minh bạch' dist/vi/index.html; then exit 1; fi
+          if grep -q 'Start small. Build something useful' dist/index.html; then exit 1; fi
+          if grep -q 'Dự án nhỏ. Kết quả rõ ràng' dist/vi/services/index.html; then exit 1; fi
+
+      - name: Validate UI refinements v1.3.1
+        run: |
+          set -eu
+          grep -q 'Explore KhaiBuilds' dist/index.html
+          grep -q 'Khám phá KhaiBuilds' dist/vi/index.html
+          grep -q 'Independent digital studio' dist/index.html
+          grep -q 'Studio số độc lập' dist/vi/index.html
+          grep -q 'Domain opportunities' dist/index.html
+          grep -q 'Cơ hội tên miền' dist/vi/index.html
+          grep -q 'Have a project in mind' dist/index.html
+          grep -q 'Bạn có ý tưởng muốn thực hiện' dist/vi/index.html
+          grep -q 'Ứng dụng Android</h3>' dist/vi/index.html
+          grep -q 'Ứng dụng Android cho một nhu cầu cụ thể' dist/vi/services/android-apps/index.html
+          grep -q 'mailto:hi@khaibuilds.com' dist/index.html
+          for file in dist/index.html dist/vi/index.html; do
+            if grep -q 'class="portfolio-pending"' "$file"; then echo "Unexpected pending card in $file"; exit 1; fi
+            if grep -q 'class="card-arrow"' "$file"; then echo "Redundant card arrow in $file"; exit 1; fi
+            if grep -q 'Selected domains' "$file"; then echo "Domain catalogue implied by $file"; exit 1; fi
+          done
+          if grep -q 'Ứng dụng Android theo yêu cầu</h3>' dist/vi/index.html; then exit 1; fi
+
+      - name: Verify homepage and Services information architecture v1.3.2
+        run: |
+          node --input-type=module <<'NODE'
+          import { readFileSync } from "node:fs";
+          import assert from "node:assert/strict";
+          for (const prefix of ["", "vi/"]) {
+            const home = readFileSync(`dist/${prefix}index.html`, "utf8");
+            const services = readFileSync(`dist/${prefix}services/index.html`, "utf8");
+            const domain = readFileSync(`dist/${prefix}domains/index.html`, "utf8");
+            const websiteDetail = readFileSync(`dist/${prefix}services/personal-websites/index.html`, "utf8");
+            const androidDetail = readFileSync(`dist/${prefix}services/android-apps/index.html`, "utf8");
+            const contains = (html, marker) => html.includes(marker);
+            assert(contains(home, 'id="services-title"'), `Missing homepage offerings: ${prefix}`);
+            assert(contains(home, 'id="end-title"'), `Missing homepage CTA: ${prefix}`);
+            assert(!contains(home, 'id="process-title"'), `Service process leaked onto homepage: ${prefix}`);
+            assert(!contains(home, 'class="portfolio-pending"'), `Empty portfolio leaked onto homepage: ${prefix}`);
+            assert(home.indexOf('id="services-title"') < home.indexOf('id="end-title"'), `Incorrect homepage order: ${prefix}`);
+            if (contains(home, 'id="work-title"')) {
+              assert(home.indexOf('id="services-title"') < home.indexOf('id="work-title"'), `Work should follow offerings: ${prefix}`);
+              assert(home.indexOf('id="work-title"') < home.indexOf('id="end-title"'), `CTA should follow Work: ${prefix}`);
+            }
+            assert(contains(services, 'id="services-title"'), `Missing Services cards: ${prefix}`);
+            assert(contains(services, 'id="process-title"'), `Missing Services steps: ${prefix}`);
+            assert(contains(services, 'id="end-title"'), `Missing Services inquiry CTA: ${prefix}`);
+            assert(services.indexOf('id="services-title"') < services.indexOf('id="process-title"'), `Services process order incorrect: ${prefix}`);
+            assert(services.indexOf('id="process-title"') < services.indexOf('id="end-title"'), `Services CTA order incorrect: ${prefix}`);
+            assert.equal((services.match(/class="step"/g) || []).length, 3, `Services should have three steps: ${prefix}`);
+            for (const page of [domain, websiteDetail, androidDetail]) {
+              assert(!contains(page, 'id="process-title"'), `Build service process should appear only in the Services hub: ${prefix}`);
+            }
+            assert(contains(home, "mailto:hi@khaibuilds.com"), `Homepage email CTA missing: ${prefix}`);
+            assert(contains(services, "mailto:hi@khaibuilds.com"), `Services email CTA missing: ${prefix}`);
+          }
+          const en = readFileSync("dist/services/index.html", "utf8");
+          const vi = readFileSync("dist/vi/services/index.html", "utf8");
+          for (const phrase of ["Discuss your needs", "Agree on the scope", "Build and hand over", "Have a website or Android app in mind?"]) {
+            assert(en.includes(phrase), `Missing EN step/CTA: ${phrase}`);
+          }
+          for (const phrase of ["Trao đổi nhu cầu", "Thống nhất phạm vi", "Triển khai và bàn giao", "Bạn cần website hay ứng dụng Android?"]) {
+            assert(vi.includes(phrase), `Missing VI step/CTA: ${phrase}`);
+          }
+          NODE
+      - name: Verify owner-approved domains and enquiry routes in both languages
+        run: |
+          node --input-type=module <<'NODE'
+          import { readFileSync } from "node:fs";
+          import assert from "node:assert/strict";
+          const collaboration = ["x99.vn","buiduong.com","cayduong.com","phunghiep.com","datchinhrong.com","datchinhrong.vn"];
+          const acquisition = ["1368x.com","onymid.com","onymiq.com","onymai.com","trueonym.com","qkmatrix.com","chipletoptics.com","xpuoptics.com","awbiq.com","uldid.com","eblapi.com","dockturn.com","teurate.com","teusync.com","dockcycle.com","trailermetric.com"];
+          assert.equal(collaboration.length,6);
+          assert.equal(acquisition.length,16);
+          for (const prefix of ["","vi/"]) {
+            const html=readFileSync(`dist/${prefix}domains/index.html`,"utf8");
+            for(const domain of [...collaboration,...acquisition]) assert(html.includes(domain),`Missing ${domain} in ${prefix}domains`);
+            const collaborativeHtml = html.match(/class="collaboration-names"[^>]*>(.*?)<\/ul>/s)?.[1] || "";
+            const firstName = collaborativeHtml.match(/class="collaboration-name"[^>]*>\s*([^<]+)/)?.[1]?.trim();
+            assert.equal(firstName,"x99.vn","x99.vn must be the first collaboration domain");
+            assert.equal((html.match(/class="collaboration-name"/g)||[]).length,6,"Expected six name-only collaboration items");
+            const section=html.split('aria-labelledby="collaboration-title">')[1]?.split('</section>')[0] || "";
+            assert(!section.includes('class="collaboration-card"') && !section.includes('class="domain-status"'),"Collaboration must be names only");
+            assert(!section.includes('Chuyện đời thường') && !section.includes('Everyday people'),"Do not show inferred meanings in collaboration");
+            assert.equal((html.match(/class="sale-card"/g)||[]).length,16,"Expected 16 acquisition/lease cards");
+            assert(html.includes("mailto:hi@khaibuilds.com?subject="),"Domain-specific email CTA missing");
+            assert(html.includes('index,follow'),"Production domain page must be indexable");
+            assert(!html.includes('href="https://www.sedo.com'),"Unverified marketplace links must not be invented");
+          }
+          const en=readFileSync("dist/domains/index.html","utf8");
+          const vi=readFileSync("dist/vi/domains/index.html","utf8");
+          assert(en.includes("Collaboration opportunities") && en.includes("Domains available for lease or transfer"));
+          assert(vi.includes("Ưu tiên hợp tác khai thác") && vi.includes("Ưu tiên cho thuê hoặc chuyển nhượng"));
+          NODE
+

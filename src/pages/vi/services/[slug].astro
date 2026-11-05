@@ -1,0 +1,13 @@
+---
+import Base from "../../../layouts/Base.astro";
+import { getPublicServices } from "../../../data/services";
+
+export function getStaticPaths() {
+  return getPublicServices().map(service => ({
+    params: { slug: service.slug },
+    props: { slug: service.slug }
+  }));
+}
+const { slug } = Astro.props;
+---
+<Base locale="vi" section="services" serviceSlug={slug} />
