@@ -1,0 +1,216 @@
+---
+import "../styles/global.css";
+import { content, pageHref, type Locale, type Section } from "../lib/copy";
+import { getPublicServices, getPublicService, serviceHref } from "../data/services";
+import { getPublicProjects } from "../data/projects";
+import { getPublicDomains } from "../data/domains";
+import DomainCatalog from "../components/DomainCatalog.astro";
+import { CONTACT_EMAIL, CONTACT_MAILTO, inquiryMailto } from "../lib/contact";
+
+interface Props { locale: Locale; section: Section; serviceSlug?: string }
+const { locale, section, serviceSlug } = Astro.props;
+const t = content[locale];
+const service = serviceSlug ? getPublicService(serviceSlug) : undefined;
+if (serviceSlug && !service) throw new Error("Unpublished service: "+serviceSlug);
+const page = service ? service.locales[locale] : t.pages[section];
+const enHref = service ? serviceHref(service.slug,"en") : pageHref(section,"en");
+const viHref = service ? serviceHref(service.slug,"vi") : pageHref(section,"vi");
+const canonical = new URL(locale==="vi"?viHref:enHref,"https://khaibuilds.com").toString();
+const menuKeys = ["services","projects","domains","about"] as const;
+const isService = Boolean(service);
+const showContactCta = isService || !["contact","privacy","terms","home"].includes(section);
+const publicServices = getPublicServices();
+const portfolio = getPublicProjects();
+const domains = getPublicDomains();
+const cards = [
+  ...publicServices.map((s,i)=>({
+    href:serviceHref(s.slug,locale),index:String(i+1).padStart(2,"0"),
+    title:s.locales[locale].cardTitle,detail:s.locales[locale].cardDescription
+  })),
+  ...(section==="home" ? [{
+    href:pageHref("domains",locale),
+    index:String(publicServices.length+1).padStart(2,"0"),
+    title:locale==="en"?"Domain opportunities":"Cơ hội tên miền",
+    detail:locale==="en"?"Explore domain collaboration, leasing and transfer opportunities.":"Trao đổi hợp tác khai thác, cho thuê hoặc chuyển nhượng tên miền."
+  }] : [])
+];
+const titleId = "page-title";
+const hasFeaturedWork = portfolio.length > 0;
+const inquiryKind = service?.slug === "personal-websites" ? "website" : service?.slug === "android-apps" ? "android" : "general";
+const contactAction = section === "domains" ? inquiryMailto("domain",locale) : service ? inquiryMailto(inquiryKind,locale) : CONTACT_MAILTO;
+---
+<!doctype html>
+<html lang={locale}>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#F8FAFC" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <meta name="description" content={page.description} />
+  <meta name="robots" content={section==="privacy" || section==="terms" ? "noindex,follow" : "index,follow"} />
+  <link rel="canonical" href={canonical} />
+  <link rel="alternate" hreflang="en" href={new URL(enHref,"https://khaibuilds.com").toString()} />
+  <link rel="alternate" hreflang="vi" href={new URL(viHref,"https://khaibuilds.com").toString()} />
+  <link rel="alternate" hreflang="x-default" href={new URL(enHref,"https://khaibuilds.com").toString()} />
+  <meta property="og:title" content={page.title + " | KhaiBuilds"} />
+  <meta property="og:description" content={page.description} />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content={canonical} />
+  <title>{page.title} | KhaiBuilds</title>
+</head>
+<body>
+  <a class="skip" href="#main">{locale==="vi"?"Đến nội dung chính":"Skip to main content"}</a>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href={pageHref("home",locale)} aria-label="KhaiBuilds">
+        <span class="brand-mark" aria-hidden="true">K</span><span>KhaiBuilds</span>
+      </a>
+      <nav class="desktop-nav" aria-label={locale==="vi"?"Điều hướng chính":"Primary navigation"}>
+        {menuKeys.map((key)=><a href={pageHref(key,locale)} aria-current={(section===key || (key==="services" && isService))?"page":undefined}>{t.nav[key]}</a>)}
+      </nav>
+      <div class="header-actions">
+        <nav class="lang-links" aria-label={t.language}>
+          <a href={enHref} lang="en" data-language-switch="en" aria-current={locale==="en"?"page":undefined}>EN</a>
+          <span aria-hidden="true">/</span>
+          <a href={viHref} lang="vi" data-language-switch="vi" aria-current={locale==="vi"?"page":undefined}>VI</a>
+        </nav>
+        <a class="action-button" href={pageHref("contact",locale)}>{t.contact}<span aria-hidden="true">↗</span></a>
+        <details class="mobile-nav">
+          <summary aria-label={locale==="vi"?"Mở menu":"Open menu"}><span aria-hidden="true">☰</span></summary>
+          <nav class="mobile-links" aria-label={locale==="vi"?"Menu di động":"Mobile navigation"}>
+            {menuKeys.map((key)=><a href={pageHref(key,locale)} aria-current={(section===key || (key==="services"&&isService))?"page":undefined}>{t.nav[key]}</a>)}
+            {publicServices.map((item)=><a href={serviceHref(item.slug,locale)}>{item.locales[locale].cardTitle}</a>)}
+            <a class="mobile-contact" href={pageHref("contact",locale)}>{t.contact} ↗</a>
+          </nav>
+        </details>
+      </div>
+    </div>
+  </header>
+  <main id="main">
+    <div class="container">
+      <aside id="language-suggestion" class="lang-hint" hidden aria-label={t.language}>
+        <div class="hint-copy"><span class="hint-icon" aria-hidden="true">A/文</span><span>{t.langHint}</span></div>
+        <div class="hint-actions">
+          <a href={locale==="en"?viHref:enHref} data-language-switch={locale==="en"?"vi":"en"}>{t.change} ↗</a>
+          <button type="button" id="dismiss-language" aria-label={t.stay}>×</button>
+        </div>
+      </aside>
+      <section class:list={["hero",section==="home"?"hero-home":"hero-inner",section==="contact"?"hero-contact":""]} aria-labelledby={titleId}>
+        <div class="hero-body">
+          <p class="eyebrow">{page.eyebrow}</p>
+          <h1 id={titleId}>{page.title}</h1>
+          <p class="lead">{page.description}</p>
+          {section==="home" && <div class="hero-actions">
+            <a class="button" href={hasFeaturedWork?pageHref("projects",locale):pageHref("services",locale)}>{hasFeaturedWork?t.seeWork:t.explore} <span aria-hidden="true">↗</span></a>
+            <a class="button ghost" href={hasFeaturedWork?pageHref("services",locale):pageHref("contact",locale)}>{hasFeaturedWork?t.explore:t.contact}</a>
+          </div>}
+          {isService && <div class="hero-actions">
+            <a class="button" href={contactAction}>{t.inquire} <span aria-hidden="true">↗</span></a>
+            <a class="button ghost" href={pageHref("services",locale)}>{t.backToServices}</a>
+          </div>}
+        </div>
+      </section>
+
+      {(section==="home" || section==="services") && !isService && <section class:list={["section",section==="home"?"section-home-offerings":""]} aria-labelledby="services-title">
+        <div class="section-head">
+          <div><p class="eyebrow">{page.label}</p><h2 id="services-title">{section==="services"?(locale==="en"?"Websites & Android apps":"Website và ứng dụng Android"):t.whatWeDo}</h2></div>
+        </div>
+        <div class:list={["cards",section==="services"?"cards-two":""]}>
+          {cards.map((card)=><article class="card">
+            <div class="card-top"><span class="card-number">{card.index}</span><span class="card-line" aria-hidden="true"></span></div>
+            <h3>{card.title}</h3>
+            <p>{card.detail}</p>
+            <a class="card-link" href={card.href}>{t.viewDetails}<span aria-hidden="true">↗</span></a>
+          </article>)}
+        </div>
+      </section>}
+
+      {section==="home" && hasFeaturedWork && <section class="section section-work" aria-labelledby="work-title">
+        <div class="section-head">
+          <div><p class="eyebrow">{locale==="en"?"Portfolio":"Dự án"}</p><h2 id="work-title">{locale==="en"?"Work & experiments":"Dự án và thử nghiệm"}</h2></div>
+          <a class="card-link" href={pageHref("projects",locale)}>{t.seeWork} ↗</a>
+        </div>
+        {portfolio.length ? <div class="cards">
+          {portfolio.map(p=><article class="card">
+            <span class="card-number">{p.stage.toUpperCase()}</span>
+            <h3>{p.locale[locale].title}</h3><p>{p.locale[locale].summary}</p>
+            <div class="tag-list">{p.tags.map(tag=><span class="tag">{tag}</span>)}</div>
+            {p.publicUrl && <a class="card-link" href={p.publicUrl} target="_blank" rel="noopener noreferrer">{locale==="en"?"Visit project":"Mở dự án"} ↗</a>}
+          </article>)}
+        </div> : <div class="portfolio-empty"><span aria-hidden="true">◫</span>
+          <p>{locale==="en"?"Portfolio entries are being reviewed before publication. Only verified work will be shown.":"Đang rà soát các dự án trước khi công khai. Chỉ hiển thị sản phẩm có thông tin đã xác minh."}</p>
+        </div>}
+      </section>}
+
+      {section==="services" && !isService && <section class="section section-process" aria-labelledby="process-title">
+        <div class="section-head">
+          <div><p class="eyebrow">{locale==="en"?"Our process":"Cách làm việc"}</p><h2 id="process-title">{t.approach}</h2></div>
+        </div>
+        <div class="process-grid">
+          {t.steps.map((step,i)=><article class="step"><span class="step-num">0{i+1}</span><h3>{step.title}</h3><p>{step.detail}</p></article>)}
+        </div>
+      </section>}
+
+      {section!=="home" && (section!=="services" || isService) && <section class="section section-detail">
+        <div class="detail-main">
+          {section!=="contact" && <p class="eyebrow">{locale==="en"?"Overview":"Tổng quan"}</p>}
+          <h2>{page.label}</h2>
+          {page.paragraphs.map((paragraph)=><p>{paragraph}</p>)}
+          {section==="domains" && domains.length>0 && <DomainCatalog locale={locale} domains={domains} />}
+          {section==="domains" && domains.length===0 && <div class="empty-note" role="status">
+            <span aria-hidden="true">◎</span>
+            <div><strong>{locale==="en"?"No domains listed yet":"Chưa có tên miền được công khai"}</strong>
+            <p>{locale==="en"?"Email KhaiBuilds to discuss a domain idea or proposal.":"Gửi email nếu bạn muốn trao đổi về một tên miền hoặc đề xuất hợp tác."}</p></div>
+          </div>}
+          {section==="projects" && portfolio.length>0 && <div class="cards listing-cards">{portfolio.map(p=><article class="card"><p class="eyebrow">{p.stage} · {p.tags.join(" / ")}</p><h3>{p.locale[locale].title}</h3><p>{p.locale[locale].summary}</p>{p.publicUrl && <a class="card-link" href={p.publicUrl} target="_blank" rel="noopener noreferrer">{locale==="en"?"Visit project":"Mở dự án"} ↗</a>}</article>)}</div>}
+          {section==="projects" && portfolio.length===0 && <div class="empty-note" role="status">
+            <span aria-hidden="true">◫</span>
+            <div><strong>{locale==="en"?"No projects published yet":"Chưa có dự án công khai"}</strong><p>{locale==="en"?"New work will appear when ready to share.":"Dự án sẽ được bổ sung khi sẵn sàng giới thiệu."}</p></div>
+          </div>}
+          {section==="contact" && <div class="contact-panel">
+            <p class="eyebrow">{locale==="en"?"Direct email":"Email trực tiếp"}</p>
+            <a class="contact-address" href={CONTACT_MAILTO}>{CONTACT_EMAIL}</a>
+            <p>{locale==="en"?"Opens your email app. You can also copy the address.":"Mở ứng dụng email. Bạn cũng có thể sao chép địa chỉ này."}</p>
+            <div class="contact-actions">
+              <a class="button" href={inquiryMailto("general",locale)}>{locale==="en"?"Compose an email":"Soạn email"} <span aria-hidden="true">↗</span></a>
+              <button type="button" class="button ghost" data-copy-email="hi@khaibuilds.com">{locale==="en"?"Copy email address":"Sao chép địa chỉ email"}</button>
+            </div>
+            <span class="copy-status" role="status" aria-live="polite" data-copy-status></span>
+          </div>}
+          {page.included && <div class="scope-wrap">
+            <div class="scope-box"><h3>{t.scopeTitle}</h3><ul>{page.included.map(item=><li>{item}</li>)}</ul></div>
+            <div class="scope-box scope-box-muted"><h3>{t.exclusionsTitle}</h3><ul>{page.notIncluded?.map(item=><li>{item}</li>)}</ul></div>
+          </div>}
+          {showContactCta && <div class="detail-cta"><p>{locale==="en"?"Have a project in mind?":"Có việc muốn trao đổi?"}</p><a class="button" href={contactAction}>{locale==="en"?"Email KhaiBuilds":"Gửi email"} ↗</a></div>}
+        </div>
+      </section>}
+
+      {(section==="home" || (section==="services" && !isService)) && <section class="section-bottom" aria-labelledby="end-title">
+        <p class="eyebrow">{section==="home"
+          ?(locale==="en"?"Have an idea?":"Có ý tưởng?")
+          :(locale==="en"?"Service inquiry":"Yêu cầu dịch vụ")}</p>
+        <h2 id="end-title">{section==="home"
+          ?(locale==="en"?"Have a project in mind?":"Bạn có ý tưởng muốn thực hiện?")
+          :(locale==="en"?"Have a website or Android app in mind?":"Bạn cần website hay ứng dụng Android?")}</h2>
+        <p>{section==="home"
+          ?(locale==="en"?"Share your idea by email, and let’s explore what could work.":"Hãy chia sẻ nhu cầu qua email để cùng tìm hướng triển khai phù hợp.")
+          :(locale==="en"?"Send a short outline by email. Scope, timing and cost can be discussed before starting.":"Gửi mô tả ngắn qua email để trao đổi phạm vi, thời gian và chi phí trước khi bắt đầu.")}</p>
+        <a class="button ghost" href={inquiryMailto("general",locale)}>{locale==="en"?"Email KhaiBuilds":"Gửi email"} ↗</a>
+      </section>}
+    </div>
+  </main>
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <span class="footer-brand">© {new Date().getFullYear()} KhaiBuilds</span>
+      <div class="footer-secondary">
+        <a class="footer-email" href={CONTACT_MAILTO}>{CONTACT_EMAIL}</a>
+        <nav class="footer-links" aria-label={locale==="vi"?"Pháp lý":"Legal"}>
+          <a href={pageHref("privacy",locale)}>{t.privacy}</a>
+          <a href={pageHref("terms",locale)}>{t.terms}</a>
+        </nav>
+      </div>
+    </div>
+  </footer>
+  <script src="/lang.js" defer></script>
+</body>
+</html>

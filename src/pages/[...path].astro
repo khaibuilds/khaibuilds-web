@@ -1,0 +1,18 @@
+---
+import Base from "../layouts/Base.astro";
+import { type Locale, type Section } from "../lib/copy";
+
+export function getStaticPaths() {
+  // Astro hoists getStaticPaths: do not access variables declared in frontmatter.
+  const allowed = [
+    "services", "projects", "domains", "about", "collaborate",
+    "contact", "privacy", "terms"
+  ] as Section[];
+  return allowed.flatMap(section => [
+    { params: { path: section }, props: { section, locale: "en" as Locale } },
+    { params: { path: "vi/" + section }, props: { section, locale: "vi" as Locale } }
+  ]);
+}
+const { section, locale } = Astro.props as { section: Section; locale: Locale };
+---
+<Base section={section} locale={locale} />

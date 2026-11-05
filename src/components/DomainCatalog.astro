@@ -1,0 +1,114 @@
+---
+import type { Locale } from "../lib/copy";
+import type { DomainListing } from "../data/domains";
+import { domainInquiryMailto } from "../lib/contact";
+
+interface Props { locale: Locale; domains: DomainListing[] }
+const { locale, domains } = Astro.props;
+const collaborative = domains.filter(d => d.offerTypes.includes("partnership"));
+const saleOrLease = domains.filter(d => d.offerTypes.includes("acquisition") || d.offerTypes.includes("license"));
+const translations = {
+  en: {
+    collabIndex: "01 / Collaboration",
+    collabTitle: "Collaboration opportunities",
+    collabAction: "Discuss collaboration",
+    collabCount: "domain names",
+    saleIndex: "02 / Lease & transfer",
+    saleTitle: "Domains available for lease or transfer",
+    saleDescription: "Selected domains open to leasing or transfer inquiries. Usage and other terms are discussed separately.",
+    saleStatus: "Lease / Transfer",
+    saleAction: "Inquire",
+    saleCount: "domain names",
+    disclaimer: "These listings invite discussion only. No price, transfer, lease or partnership is guaranteed; all details require separate confirmation and agreement."
+  },
+  vi: {
+    collabIndex: "01 / Hợp tác",
+    collabTitle: "Ưu tiên hợp tác khai thác",
+    collabAction: "Đề xuất hợp tác",
+    collabCount: "tên miền",
+    saleIndex: "02 / Cho thuê hoặc chuyển nhượng",
+    saleTitle: "Ưu tiên cho thuê hoặc chuyển nhượng",
+    saleDescription: "Tiếp nhận đề xuất thuê hoặc chuyển nhượng các tên miền. Phương án khai thác và điều kiện cụ thể được trao đổi riêng.",
+    saleStatus: "Cho thuê / Chuyển nhượng",
+    saleAction: "Liên hệ",
+    saleCount: "tên miền",
+    disclaimer: "Danh mục chỉ nhằm tiếp nhận đề xuất, không phải cam kết về giá hoặc giao dịch. Việc chuyển nhượng, thuê hay hợp tác cần xác nhận và thỏa thuận riêng."
+  }
+} as const;
+const t = translations[locale];
+---
+<div class="domain-catalog">
+  {collaborative.length > 0 && <section class="domain-group" aria-labelledby="collaboration-title">
+    <div class="domain-group-heading">
+      <div>
+        <p class="eyebrow">{t.collabIndex}</p>
+        <h3 id="collaboration-title">{t.collabTitle}</h3>
+      </div>
+      <span class="domain-count">{collaborative.length} {t.collabCount}</span>
+    </div>
+    <ul class="collaboration-names">
+      {collaborative.map(item => <li class="collaboration-name">{item.domain}</li>)}
+    </ul>
+    <a class="domain-action collaboration-inquiry" href={domainInquiryMailto("Collaboration", "collaboration", locale)}>
+      {t.collabAction}<span aria-hidden="true">↗</span>
+    </a>
+  </section>}
+
+  {saleOrLease.length > 0 && <section class="domain-group" aria-labelledby="acquisition-title">
+    <div class="domain-group-heading">
+      <div>
+        <p class="eyebrow">{t.saleIndex}</p>
+        <h3 id="acquisition-title">{t.saleTitle}</h3>
+        <p>{t.saleDescription}</p>
+      </div>
+      <span class="domain-count">{saleOrLease.length} {t.saleCount}</span>
+    </div>
+    <div class="sale-grid">
+      {saleOrLease.map(item => <article class="sale-card">
+        <div class="sale-copy">
+          <p class="domain-status">{t.saleStatus}</p>
+          <h4>{item.domain}</h4>
+          <p>{item.locale[locale].summary}</p>
+        </div>
+        <a class="domain-action" href={domainInquiryMailto(item.domain, "leasing-or-transfer", locale)}
+           aria-label={`${t.saleAction}: ${item.domain}`}>
+          {t.saleAction}<span aria-hidden="true">↗</span>
+        </a>
+      </article>)}
+    </div>
+  </section>}
+  <p class="domain-disclaimer">{t.disclaimer}</p>
+</div>
+
+<style>
+  .domain-catalog { margin: 32px 0 20px; }
+  .domain-group { margin: 0 0 clamp(38px,5vw,62px); }
+  .domain-group-heading { display:flex;align-items:end;justify-content:space-between;gap:22px;padding-top:24px;margin-bottom:23px;border-top:1px solid var(--line); }
+  .domain-group-heading .eyebrow { margin:0 0 7px; }
+  .domain-group-heading h3 { font-size:clamp(1.45rem,2.4vw,2rem);font-weight:740;letter-spacing:-.045em;line-height:1.25;margin:0 0 10px; }
+  .domain-group-heading p:not(.eyebrow) { color:var(--muted);max-width:660px;line-height:1.6;margin:0; }
+  .domain-count { white-space:nowrap;flex-shrink:0;color:var(--muted);font-size:.84rem; }
+  .collaboration-names { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;list-style:none;padding:0;margin:0; }
+  .collaboration-name { display:flex;align-items:center;min-width:0;min-height:68px;overflow-wrap:anywhere;padding:16px 22px;border:1px solid var(--line-soft);border-radius:var(--radius);background:var(--surface);font-size:clamp(1.12rem,2vw,1.4rem);font-weight:730;letter-spacing:-.03em; }
+  .collaboration-inquiry { margin-top:16px; }
+  .sale-grid { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px; }
+  .sale-card { display:flex;flex-direction:column;align-items:flex-start;border:1px solid var(--line-soft);border-radius:var(--radius);background:var(--surface);padding:clamp(20px,2.5vw,29px);min-width:0; }
+  .domain-status { color:#0a677b;font-size:.74rem;font-weight:720;letter-spacing:.035em;margin:0 0 12px;text-transform:uppercase; }
+  h4 { font-size:clamp(1.18rem,2.2vw,1.55rem);line-height:1.34;letter-spacing:-.035em;overflow-wrap:anywhere;margin:0 0 12px;font-weight:730; }
+  .sale-copy>p:not(.domain-status) { font-size:.94rem;line-height:1.55;color:var(--muted);margin:0 0 18px; }
+  .domain-action { margin-top:auto;display:inline-flex;gap:11px;align-items:center;min-height:40px;color:#0a677b;font-size:.91rem;font-weight:720;text-decoration:none; }
+  .domain-action:hover { text-decoration:underline;text-underline-offset:4px; }
+  .domain-action:focus-visible { outline:2px solid #0a677b;outline-offset:3px;border-radius:3px; }
+  .sale-card { min-height:178px;gap:10px; }
+  .sale-copy h4 { margin-bottom:5px;font-size:clamp(1.13rem,1.8vw,1.38rem); }
+  .sale-copy>p:not(.domain-status) { margin:0; }
+  .domain-disclaimer { border-top:1px solid var(--line-soft);padding-top:18px;color:var(--muted);font-size:.86rem;line-height:1.6;max-width:850px; }
+  @media(max-width:680px) {
+    .domain-catalog { margin-top:24px; }
+    .domain-group-heading { align-items:flex-start;flex-direction:column;gap:8px; }
+    .collaboration-names,.sale-grid { grid-template-columns:1fr;gap:12px; }
+    .collaboration-name { min-height:60px;padding:15px 18px; }
+    .sale-card { min-height:145px; }
+    .domain-count { white-space:normal; }
+  }
+</style>
