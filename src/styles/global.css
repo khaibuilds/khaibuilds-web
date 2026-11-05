@@ -51,6 +51,7 @@ a:focus-visible,button:focus-visible,summary:focus-visible { outline:3px solid v
 .hero-home h1 { max-width:830px }
 .hero-inner h1 { max-width:880px }
 .lead { margin:0;max-width:675px;color:var(--muted);font-size:clamp(1.04rem,1.75vw,1.23rem);line-height:1.65 }
+.brand-tagline { margin:16px 0 0;font-size:.87rem;color:#64748b;letter-spacing:.01em }
 .hero-actions { display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-top:31px }
 .section { padding-bottom:clamp(65px,8vw,105px) }
 .section-head { display:flex;align-items:end;justify-content:space-between;gap:28px;border-top:1px solid var(--line);padding-top:25px;margin-bottom:28px }
@@ -248,3 +249,15 @@ a:focus-visible,button:focus-visible,summary:focus-visible { outline:3px solid v
 .not-found-vi { max-width:675px;margin-top:48px;padding-top:28px;border-top:1px solid var(--line) }
 .not-found-vi h2 { margin:0 0 10px;font-size:clamp(1.45rem,3vw,2rem);letter-spacing:-.035em }
 .not-found-vi p { color:var(--muted);margin:0 0 20px }
+
+/* G5.3: restrained portfolio evidence, consistent with the existing cards. */
+.portfolio-card h3 { margin:18px 0 12px; overflow-wrap:anywhere }
+.portfolio-card p.project-meta { color:#0a677b;font-size:.77rem;letter-spacing:.045em;font-weight:750;margin:0;line-height:1.4 }
+.portfolio-card p.project-focus { border-top:1px solid var(--line-soft);padding-top:14px;margin:0 0 15px;font-size:.93rem }
+.portfolio-card .tag-list { margin-top:auto;padding-top:5px }
+.project-actions { display:flex;align-items:center;flex-wrap:wrap;gap:10px 22px;margin-top:20px;line-height:1.5 }
+.project-actions .card-link { margin-top:0;font-size:.9rem }
+@media(max-width:620px) {
+  .portfolio-card { min-height:0 }
+  .project-actions { gap:10px 18px }
+}

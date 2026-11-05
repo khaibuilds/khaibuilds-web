@@ -5,18 +5,24 @@
 export const CONTACT_EMAIL = "hi@khaibuilds.com" as const;
 export const CONTACT_MAILTO = `mailto:${CONTACT_EMAIL}` as const;
 
-export function inquiryMailto(kind: "general" | "website" | "android" | "domain", locale: "en" | "vi"): string {
+export function inquiryMailto(kind: "general" | "website" | "android" | "domain" | "bugfix" | "javascript" | "maintenance", locale: "en" | "vi"): string {
   const subjects = {
     en: {
-      general: "KhaiBuilds inquiry",
-      website: "KhaiBuilds — Personal Website inquiry",
-      android: "KhaiBuilds — Android App inquiry",
+      general: "KhaiBuilds — Web task inquiry",
+      bugfix: "KhaiBuilds — Website bug fix inquiry",
+      javascript: "KhaiBuilds — Small JavaScript tool inquiry",
+      maintenance: "KhaiBuilds — Static site maintenance inquiry",
+      website: "KhaiBuilds — Simple personal website inquiry",
+      android: "KhaiBuilds — Small Android utility inquiry",
       domain: "KhaiBuilds — Domain inquiry"
     },
     vi: {
-      general: "Liên hệ KhaiBuilds",
+      general: "KhaiBuilds — Yêu cầu công việc web",
+      bugfix: "KhaiBuilds — Yêu cầu sửa lỗi website",
+      javascript: "KhaiBuilds — Yêu cầu tiện ích JavaScript nhỏ",
+      maintenance: "KhaiBuilds — Yêu cầu bảo trì website tĩnh",
       website: "KhaiBuilds — Yêu cầu website cá nhân",
-      android: "KhaiBuilds — Yêu cầu Android app",
+      android: "KhaiBuilds — Yêu cầu tiện ích Android nhỏ",
       domain: "KhaiBuilds — Trao đổi tên miền"
     }
   } as const;

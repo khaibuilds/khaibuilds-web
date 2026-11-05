@@ -63,7 +63,7 @@ jobs:
       - name: Verify three-pillar pages and both languages
         run: |
           set -eu
-          for route in             index             services/index             services/personal-websites/index             services/android-apps/index             domains/index             projects/index             contact/index             vi/index             vi/services/index             vi/services/personal-websites/index             vi/services/android-apps/index             vi/domains/index             vi/projects/index             vi/contact/index; do
+          for route in             index             services/index             services/website-bug-fixes/index             services/javascript-tools/index             services/static-site-maintenance/index             services/personal-websites/index             services/android-apps/index             domains/index             projects/index             contact/index             vi/index             vi/services/index             vi/services/website-bug-fixes/index             vi/services/javascript-tools/index             vi/services/static-site-maintenance/index             vi/services/personal-websites/index             vi/services/android-apps/index             vi/domains/index             vi/projects/index             vi/contact/index; do
             test -f "dist/$route.html" || { echo "Missing: dist/$route.html"; exit 1; }
           done
       - name: Verify 404, favicon, OG URL and contact copy actions
@@ -99,7 +99,7 @@ jobs:
           test ! -e dist/vi/services/video-editing/index.html
           test ! -e dist/services/local-business/index.html
           test ! -e dist/vi/services/local-business/index.html
-          grep -q 'Building ideas into digital assets' dist/index.html
+          grep -q 'Practical web fixes. Lightweight tools. Clear delivery.' dist/index.html
           if grep -q 'portfolio-pending' dist/index.html; then echo 'No empty portfolio notice on homepage'; exit 1; fi
           if grep -q 'portfolio-empty' dist/index.html; then echo 'Empty portfolio should not occupy a large homepage block'; exit 1; fi
           grep -q 'href="/projects/"' dist/index.html
@@ -109,6 +109,9 @@ jobs:
         run: |
           set -eu
           grep -q 'A simple website for your work' dist/services/personal-websites/index.html
+          grep -q 'Fix a specific website problem' dist/services/website-bug-fixes/index.html
+          grep -q 'A lightweight tool for one clear task' dist/services/javascript-tools/index.html
+          grep -q 'Keep a static website accurate' dist/services/static-site-maintenance/index.html
           grep -q 'Typically included' dist/services/personal-websites/index.html
           grep -q 'An Android app for a specific task' dist/services/android-apps/index.html
           grep -q 'Local data storage where suitable' dist/services/android-apps/index.html
@@ -164,44 +167,84 @@ jobs:
           }
           NODE
 
-      - name: Editorial QA EN/VI — clarity and brand consistency
+      - name: G5.2 editorial QA — bilingual services and selective Android
         run: |
-          set -eu
-          grep -q 'KhaiBuilds develops personal websites and simple Android apps' dist/index.html
-          grep -q 'KhaiBuilds phát triển website cá nhân' dist/vi/index.html
-          grep -q 'Services &amp; domains' dist/index.html
-          grep -q 'Dịch vụ &amp; tên miền' dist/vi/index.html
-          grep -q 'How service projects work' dist/services/index.html
-          grep -q 'Quy trình triển khai dịch vụ' dist/vi/services/index.html
-          grep -q 'Website cá nhân, gọn và rõ' dist/vi/services/personal-websites/index.html
-          grep -q 'Small builds for specific needs' dist/services/index.html
-          grep -q 'Giải pháp gọn cho nhu cầu cụ thể' dist/vi/services/index.html
-          grep -q 'Have something in mind' dist/contact/index.html
-          grep -q 'Bạn đang có ý tưởng gì' dist/vi/contact/index.html
-          if grep -q 'Làm có mục đích và giới thiệu minh bạch' dist/vi/index.html; then exit 1; fi
-          if grep -q 'Start small. Build something useful' dist/index.html; then exit 1; fi
-          if grep -q 'Dự án nhỏ. Kết quả rõ ràng' dist/vi/services/index.html; then exit 1; fi
+          node --input-type=module <<'NODE'
+          import { readFileSync } from "node:fs";
+          import assert from "node:assert/strict";
+          const en = readFileSync("dist/index.html", "utf8");
+          const vi = readFileSync("dist/vi/index.html", "utf8");
+          const enServices = readFileSync("dist/services/index.html", "utf8");
+          const viServices = readFileSync("dist/vi/services/index.html", "utf8");
+          assert(en.includes("Independent Web Builder"));
+          assert(vi.includes("Người phát triển web độc lập"));
+          assert(en.includes("Practical web fixes. Lightweight tools. Clear delivery."));
+          assert(vi.includes("Sửa lỗi web. Công cụ gọn. Bàn giao rõ ràng."));
+          assert(en.includes("Discuss a web task"));
+          assert(vi.includes("Trao đổi công việc web"));
+          assert(enServices.includes("Focused web services for specific tasks"));
+          assert(viServices.includes("Dịch vụ web tập trung vào công việc cụ thể"));
+          assert(enServices.includes('id="conditional-title"'));
+          assert(viServices.includes('id="conditional-title"'));
+          assert(enServices.includes("Other small projects I can consider"));
+          assert(viServices.includes("Dự án nhỏ có thể xem xét thêm"));
+          const core = ["website-bug-fixes","javascript-tools","static-site-maintenance"];
+          const conditional = ["personal-websites","android-apps"];
+          for (const prefix of ["", "vi/"]) {
+            const home = readFileSync(`dist/${prefix}index.html`, "utf8");
+            const hub = readFileSync(`dist/${prefix}services/index.html`, "utf8");
+            const beforeConditional = hub.split('id="conditional-title"')[0];
+            const afterConditional = hub.split('id="conditional-title"')[1];
+            assert(afterConditional, `Missing secondary section ${prefix}`);
+            for (const slug of core) {
+              const href = `/${prefix}services/${slug}/`;
+              assert(home.includes(href), `Missing core offer ${slug}: ${prefix}`);
+              assert(beforeConditional.includes(href), `Core service not first: ${slug} ${prefix}`);
+              assert(readFileSync(`dist/${prefix}services/${slug}/index.html`,"utf8").includes("index,follow"));
+            }
+            for (const slug of conditional) {
+              assert(afterConditional.includes(`/${prefix}services/${slug}/`), `Conditional service omitted: ${slug} ${prefix}`);
+              assert(readFileSync(`dist/${prefix}services/${slug}/index.html`,"utf8").includes("index,follow"));
+            }
+            assert(!home.includes('class="portfolio-pending"'));
+            assert(!home.includes('class="card-arrow"'));
+            assert(!home.includes('class="portfolio-empty"'));
+          }
+          assert(!en.includes("KhaiBuilds develops personal websites and simple Android apps"));
+          assert(!vi.includes("Studio số độc lập"));
+          assert(readFileSync("dist/about/index.html","utf8").includes("self-developed digital tools"));
+          assert(readFileSync("dist/vi/about/index.html","utf8").includes("công cụ số tự phát triển"));
+          assert(readFileSync("dist/contact/index.html","utf8").includes("Tell me about your web task"));
+          assert(readFileSync("dist/vi/contact/index.html","utf8").includes("Chia sẻ công việc web bạn cần hỗ trợ"));
+          assert(readFileSync("dist/services/android-apps/index.html","utf8").includes("selectively"));
+          assert(readFileSync("dist/vi/services/android-apps/index.html","utf8").includes("có chọn lọc"));
+          NODE
 
-      - name: Validate UI refinements v1.3.1
+      - name: G5.3 QA — three attributed projects with safe public links
         run: |
-          set -eu
-          grep -q 'Explore KhaiBuilds' dist/index.html
-          grep -q 'Khám phá KhaiBuilds' dist/vi/index.html
-          grep -q 'Independent digital studio' dist/index.html
-          grep -q 'Studio số độc lập' dist/vi/index.html
-          grep -q 'Domain opportunities' dist/index.html
-          grep -q 'Cơ hội tên miền' dist/vi/index.html
-          grep -q 'Have a project in mind' dist/index.html
-          grep -q 'Bạn có ý tưởng muốn thực hiện' dist/vi/index.html
-          grep -q 'Ứng dụng Android</h3>' dist/vi/index.html
-          grep -q 'Ứng dụng Android cho một nhu cầu cụ thể' dist/vi/services/android-apps/index.html
-          grep -q 'mailto:hi@khaibuilds.com' dist/index.html
-          for file in dist/index.html dist/vi/index.html; do
-            if grep -q 'class="portfolio-pending"' "$file"; then echo "Unexpected pending card in $file"; exit 1; fi
-            if grep -q 'class="card-arrow"' "$file"; then echo "Redundant card arrow in $file"; exit 1; fi
-            if grep -q 'Selected domains' "$file"; then echo "Domain catalogue implied by $file"; exit 1; fi
-          done
-          if grep -q 'Ứng dụng Android theo yêu cầu</h3>' dist/vi/index.html; then exit 1; fi
+          node --input-type=module <<'NODE'
+          import { readFileSync } from "node:fs";
+          import assert from "node:assert/strict";
+          const demos = ["https://tools.9x9.vn/","https://khaibuilds.com/","https://link.9x9.vn/"];
+          const publicSource = "https://github.com/khaibuilds/khaibuilds-web";
+          for (const prefix of ["", "vi/"]) {
+            const home = readFileSync(`dist/${prefix}index.html`, "utf8");
+            const work = readFileSync(`dist/${prefix}projects/index.html`, "utf8");
+            for (const [name,html] of [["home",home],["work",work]]) {
+              assert.equal((html.match(/class="card portfolio-card"/g) || []).length, 3, `Expected three portfolio cards in ${prefix}${name}`);
+              assert.equal((html.match(/class="project-meta"/g) || []).length, 3, `Missing project origin labels: ${prefix}${name}`);
+              for (const url of demos) assert(html.includes(`href="${url}"`), `Missing verified product link ${url} on ${prefix}${name}`);
+              assert(html.includes(`href="${publicSource}"`), `Missing public-source link: ${prefix}${name}`);
+              assert(!html.includes("github.com/9x9vn/link-9x9"), "Private 9x9 LINK repository leaked");
+              assert(!html.includes("github.com/9x9vn/9x9-tools"), "Private 9x9 Tools repository leaked");
+              assert(html.includes('rel="noopener noreferrer"'), `External-link protection missing: ${prefix}${name}`);
+              assert(!html.includes("portfolio-empty"), `Empty portfolio placeholder leaked: ${prefix}${name}`);
+            }
+            assert(work.includes(prefix ? "Tự phát triển" : "Self-developed"));
+            assert(work.includes(prefix ? "không phải dự án khách hàng trả phí" : "not paid client commissions"));
+            assert(!work.includes("client testimonials") || work.includes("not paid client commissions"));
+          }
+          NODE
 
       - name: Verify homepage and Services information architecture v1.3.2
         run: |
@@ -238,10 +281,10 @@ jobs:
           }
           const en = readFileSync("dist/services/index.html", "utf8");
           const vi = readFileSync("dist/vi/services/index.html", "utf8");
-          for (const phrase of ["Discuss your needs", "Agree on the scope", "Build and hand over", "Have a website or Android app in mind?"]) {
+          for (const phrase of ["Describe the task", "Agree on the scope", "Implement and verify", "Have a task with a clear scope?"]) {
             assert(en.includes(phrase), `Missing EN step/CTA: ${phrase}`);
           }
-          for (const phrase of ["Trao đổi nhu cầu", "Thống nhất phạm vi", "Triển khai và bàn giao", "Bạn cần website hay ứng dụng Android?"]) {
+          for (const phrase of ["Mô tả công việc", "Thống nhất phạm vi", "Thực hiện và kiểm chứng", "Bạn có công việc đã rõ phạm vi?"]) {
             assert(vi.includes(phrase), `Missing VI step/CTA: ${phrase}`);
           }
           NODE
@@ -274,4 +317,5 @@ jobs:
           assert(en.includes("Collaboration opportunities") && en.includes("Domains available for lease or transfer"));
           assert(vi.includes("Ưu tiên hợp tác khai thác") && vi.includes("Ưu tiên cho thuê hoặc chuyển nhượng"));
           NODE
-
+      - name: G5.4 full static QA — routes, links, SEO, privacy and security
+        run: node scripts/g5-qa.mjs

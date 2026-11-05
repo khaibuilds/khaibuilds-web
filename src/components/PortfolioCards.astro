@@ -1,0 +1,34 @@
+---
+import type { PortfolioProject } from "../data/projects";
+import type { Locale } from "../lib/copy";
+
+interface Props {
+  projects: PortfolioProject[];
+  locale: Locale;
+  variant?: "home" | "list";
+}
+const { projects, locale, variant = "home" } = Astro.props;
+const stageLabels = {
+  en: { live: "Deployed", prototype: "Prototype", concept: "Concept" },
+  vi: { live: "Đã triển khai", prototype: "Nguyên mẫu", concept: "Ý tưởng" }
+};
+const tagLabels = {
+  en: { website: "Web", android: "Android", video: "Video", ai: "AI", local: "Local", other: "Utilities" },
+  vi: { website: "Web", android: "Android", video: "Video", ai: "AI", local: "Ngoại tuyến", other: "Tiện ích" }
+};
+---
+<div class:list={["cards",variant==="list" && "listing-cards"]}>
+  {projects.map(project=><article class="card portfolio-card">
+    <p class="project-meta">{locale==="en"?"Self-developed":"Tự phát triển"} · {stageLabels[locale][project.stage]}</p>
+    <h3>{project.locale[locale].title}</h3>
+    <p>{project.locale[locale].summary}</p>
+    <p class="project-focus">{project.locale[locale].focus}</p>
+    <div class="tag-list">
+      {project.tags.map(tag=><span class="tag">{tagLabels[locale][tag]}</span>)}
+    </div>
+    <div class="project-actions">
+      <a class="card-link" href={project.publicUrl} target="_blank" rel="noopener noreferrer">{locale==="en"?"Visit project":"Xem sản phẩm"} ↗</a>
+      {project.sourceUrl && <a class="card-link" href={project.sourceUrl} target="_blank" rel="noopener noreferrer">{locale==="en"?"Public source":"Mã nguồn công khai"} ↗</a>}
+    </div>
+  </article>)}
+</div>
