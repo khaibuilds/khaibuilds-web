@@ -10,7 +10,7 @@ export interface PortfolioProject {
   stage: ProjectStage;
   origin: "self-developed";
   tags: SkillTag[];
-  locale: Record<Locale,{title:string;summary:string;focus:string}>;
+  locale: Record<Locale,{title:string;summary:string;focus:string;proof:string[]}>;
   publicUrl: string;
   /** Include only explicitly public source; never expose private 9x9 repositories. */
   sourceUrl?: string;
@@ -32,12 +32,14 @@ export const portfolioProjects: PortfolioProject[] = [
       en: {
         title: "9×9 Tools",
         summary: "A collection of small browser utilities, including text, date, QR and image tools.",
-        focus: "Demonstrates focused JavaScript interfaces, mobile-first layouts and practical browser workflows."
+        focus: "Demonstrates focused JavaScript interfaces, mobile-first layouts and practical browser workflows.",
+        proof: ["Public browser utilities for text, date, QR and image tasks.", "Deployed through Cloudflare Workers; source code is not publicly linked."]
       },
       vi: {
         title: "9×9 Tools",
         summary: "Bộ tiện ích nhỏ trên trình duyệt, gồm công cụ văn bản, ngày tháng, QR và xử lý ảnh.",
-        focus: "Minh họa giao diện JavaScript theo nhu cầu cụ thể, thiết kế mobile-first và thao tác trình duyệt thực tế."
+        focus: "Minh họa giao diện JavaScript theo nhu cầu cụ thể, thiết kế mobile-first và thao tác trình duyệt thực tế.",
+        proof: ["Các tiện ích văn bản, ngày tháng, QR và ảnh có trang sản phẩm công khai.", "Triển khai qua Cloudflare Workers; không công khai liên kết mã nguồn."]
       }
     },
     publicUrl: "https://tools.9x9.vn/"
@@ -54,12 +56,14 @@ export const portfolioProjects: PortfolioProject[] = [
       en: {
         title: "KhaiBuilds Website",
         summary: "A bilingual portfolio website built with Astro, TypeScript and a static deployment workflow.",
-        focus: "Demonstrates responsive pages, technical SEO basics, version control and reproducible CI checks."
+        focus: "Demonstrates responsive pages, technical SEO basics, version control and reproducible CI checks.",
+        proof: ["Built with Astro and TypeScript, including English and Vietnamese routes.", "Public GitHub source includes reproducible build and static-page checks."]
       },
       vi: {
         title: "Website KhaiBuilds",
         summary: "Website hồ sơ năng lực song ngữ xây dựng bằng Astro, TypeScript và quy trình triển khai tĩnh.",
-        focus: "Minh họa trang responsive, SEO kỹ thuật cơ bản, quản lý phiên bản và kiểm tra CI tái lập được."
+        focus: "Minh họa trang responsive, SEO kỹ thuật cơ bản, quản lý phiên bản và kiểm tra CI tái lập được.",
+        proof: ["Xây dựng bằng Astro và TypeScript, có trang tiếng Anh và tiếng Việt.", "Repo GitHub công khai có quy trình build và kiểm tra trang tĩnh tái lập được."]
       }
     },
     publicUrl: "https://khaibuilds.com/",
@@ -77,12 +81,14 @@ export const portfolioProjects: PortfolioProject[] = [
       en: {
         title: "9×9 LINK",
         summary: "A shareable personal link-page tool with Google sign-in and account-managed pages.",
-        focus: "Demonstrates a scoped web product with front-end interaction and Cloudflare Pages Functions."
+        focus: "Demonstrates a scoped web product with front-end interaction and Cloudflare Pages Functions.",
+        proof: ["A web product with Google sign-in and account-managed link pages.", "Uses Cloudflare Pages Functions; implementation source stays private."]
       },
       vi: {
         title: "9×9 LINK",
         summary: "Công cụ trang liên kết cá nhân dễ chia sẻ, đăng nhập Google và quản lý trang theo tài khoản.",
-        focus: "Minh họa sản phẩm web có phạm vi rõ, tương tác phía trình duyệt và Cloudflare Pages Functions."
+        focus: "Minh họa sản phẩm web có phạm vi rõ, tương tác phía trình duyệt và Cloudflare Pages Functions.",
+        proof: ["Sản phẩm web đăng nhập Google, quản lý trang liên kết theo tài khoản.", "Sử dụng Cloudflare Pages Functions; mã nguồn triển khai vẫn riêng tư."]
       }
     },
     publicUrl: "https://link.9x9.vn/"
@@ -104,7 +110,7 @@ export function getPublicProjects(): PortfolioProject[] {
     if (!validStages.includes(p.stage) || !p.tags.length || p.tags.some(t => !validTags.includes(t))) throw new Error("Invalid project stage/tags: " + p.slug);
     for (const locale of ["en", "vi"] as const) {
       const item = p.locale[locale];
-      if (!item || !item.title.trim() || !item.summary.trim() || !item.focus.trim()) throw new Error("Incomplete project " + locale + " copy: " + p.slug);
+      if (!item || !item.title.trim() || !item.summary.trim() || !item.focus.trim() || !Array.isArray(item.proof) || item.proof.length !== 2 || item.proof.some(line => !line.trim())) throw new Error("Incomplete project " + locale + " copy: " + p.slug);
     }
     if (!/^https:\/\//.test(p.publicUrl) || (p.sourceUrl && !/^https:\/\//.test(p.sourceUrl))) throw new Error("Project URLs must use HTTPS: " + p.slug);
   }
