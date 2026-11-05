@@ -317,4 +317,5 @@ jobs:
           assert(en.includes("Collaboration opportunities") && en.includes("Domains available for lease or transfer"));
           assert(vi.includes("Ưu tiên hợp tác khai thác") && vi.includes("Ưu tiên cho thuê hoặc chuyển nhượng"));
           NODE
-
+      - name: G5.4 full static QA — routes, links, SEO, privacy and security
+        run: node scripts/g5-qa.mjs
