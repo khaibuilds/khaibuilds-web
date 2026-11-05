@@ -30,7 +30,7 @@ const cards = coreServices.map((item,i)=>({
   title:item.locales[locale].cardTitle,detail:item.locales[locale].cardDescription
 }));
 const conditionalCards = conditionalServices.map((item,i)=>({
-  href:serviceHref(item.slug,locale),index:String(i+1).padStart(2,"0"),
+  href:serviceHref(item.slug,locale),index:"S"+String(i+1),
   title:item.locales[locale].cardTitle,detail:item.locales[locale].cardDescription
 }));
 const titleId = "page-title";

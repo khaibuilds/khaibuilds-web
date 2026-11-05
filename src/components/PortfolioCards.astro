@@ -23,6 +23,10 @@ const tagLabels = {
     <h3>{project.locale[locale].title}</h3>
     <p>{project.locale[locale].summary}</p>
     <p class="project-focus">{project.locale[locale].focus}</p>
+    {variant==="list" && <div class="project-proof">
+      <p class="project-proof-label">{locale==="en"?"Implementation highlights":"Điểm triển khai nổi bật"}</p>
+      <ul>{project.locale[locale].proof.map(item=><li>{item}</li>)}</ul>
+    </div>}
     <div class="tag-list">
       {project.tags.map(tag=><span class="tag">{tagLabels[locale][tag]}</span>)}
     </div>

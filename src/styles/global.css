@@ -261,3 +261,9 @@ a:focus-visible,button:focus-visible,summary:focus-visible { outline:3px solid v
   .portfolio-card { min-height:0 }
   .project-actions { gap:10px 18px }
 }
+
+/* G6: implementation evidence is shown on Work, not crowded onto Home. */
+.portfolio-card .project-proof { margin:0 0 14px;padding:12px 0 0;border-top:1px solid var(--line-soft);color:var(--muted) }
+.portfolio-card .project-proof-label { margin:0;font-size:.82rem;font-weight:750;color:var(--text) }
+.portfolio-card .project-proof ul { margin:8px 0 0;padding-left:1.1rem;font-size:.88rem;line-height:1.55 }
+.portfolio-card .project-proof li + li { margin-top:5px }
