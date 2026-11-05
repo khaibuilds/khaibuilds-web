@@ -32,7 +32,13 @@
     "services/personal-websites/index.html",
     "vi/services/personal-websites/index.html",
     "services/android-apps/index.html",
-    "vi/services/android-apps/index.html"
+    "vi/services/android-apps/index.html",
+    "services/website-bug-fixes/index.html",
+    "vi/services/website-bug-fixes/index.html",
+    "services/javascript-tools/index.html",
+    "vi/services/javascript-tools/index.html",
+    "services/static-site-maintenance/index.html",
+    "vi/services/static-site-maintenance/index.html"
   ],
   "commands": {
     "build": [
