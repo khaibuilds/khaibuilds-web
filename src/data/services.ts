@@ -207,7 +207,7 @@ export const services: ServiceRecord[] = [
       en: {
         "cardTitle": "Simple personal websites",
         "cardDescription": "Considered when content, design reference and revisions are agreed upfront.",
-        "eyebrow": "Service / 01",
+        "eyebrow": "Selective service / 01",
         "title": "A simple website for your work.",
         "description": "A mobile-friendly personal site to introduce yourself, share what you do and make it easy to reach you.",
         "label": "Personal websites",
@@ -231,7 +231,7 @@ export const services: ServiceRecord[] = [
       vi: {
         "cardTitle": "Website cá nhân",
         "cardDescription": "Chỉ nhận khi nội dung, mẫu giao diện và số vòng sửa đã được thống nhất.",
-        "eyebrow": "Dịch vụ / 01",
+        "eyebrow": "Dịch vụ có chọn lọc / 01",
         "title": "Website cá nhân, gọn và rõ.",
         "description": "Một nơi để giới thiệu bản thân, chia sẻ công việc và giúp người khác dễ dàng liên hệ với bạn.",
         "label": "Website cá nhân",
@@ -247,8 +247,8 @@ export const services: ServiceRecord[] = [
           "Hướng dẫn bàn giao đơn giản"
         ],
         "notIncluded": [
-          "Cửa hàng trực tuyến hoặc đặt lịch phức tạp",
-          "Tài khoản thành viên hoặc hệ thống quản trị lớn",
+          "Thiết kế giao diện tùy biến khi chưa thống nhất mẫu tham chiếu hoặc số vòng sửa",
+          "Tài khoản thành viên hoặc hệ thống quản lý nội dung lớn",
           "Chỉnh sửa không giới hạn hoặc bảo trì dài hạn"
         ]
       }
@@ -266,7 +266,7 @@ export const services: ServiceRecord[] = [
       en: {
         "cardTitle": "Small Android utilities",
         "cardDescription": "Selective inquiries for small, well-scoped offline-first Android tools.",
-        "eyebrow": "Service / 02",
+        "eyebrow": "Selective service / 02",
         "title": "An Android app for a specific task.",
         "description": "A single-purpose Android utility may be considered when features, devices, revisions and handover can be clearly agreed.",
         "label": "Custom Android apps",
@@ -289,7 +289,7 @@ export const services: ServiceRecord[] = [
       vi: {
         "cardTitle": "Ứng dụng Android",
         "cardDescription": "Xem xét có chọn lọc tiện ích Android nhỏ, rõ phạm vi, ưu tiên offline.",
-        "eyebrow": "Dịch vụ / 02",
+        "eyebrow": "Dịch vụ có chọn lọc / 02",
         "title": "Ứng dụng Android cho một nhu cầu cụ thể.",
         "description": "Tiện ích Android một mục đích, chỉ nhận khi chốt rõ tính năng, thiết bị, số vòng sửa và bàn giao.",
         "label": "Tiện ích Android nhỏ",
