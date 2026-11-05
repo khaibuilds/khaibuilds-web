@@ -1,7 +1,7 @@
 # KhaiBuilds G5.1 — Positioning and service scope
 
 **Date:** 2026-11-05  
-**State:** G5.1 editorial baseline on a feature branch; not yet public website copy.  
+**State:** G5.1 baseline updated by Owner: Android utilities are conditional commercial work. G5.2 implements public copy on this branch; production remains unchanged.  
 **Repository:** `KhaiBuilds/khaibuilds-web`  
 **Next gate:** G5.2 website copy and information architecture; G5.3 portfolio proof; G5.4 QA; G5.5 Owner-approved merge/release.
 
@@ -11,7 +11,7 @@ KhaiBuilds is the independent professional portfolio and inquiry channel for **s
 
 - **Primary:** bug fixes in HTML/CSS/JavaScript, lightweight browser-based JavaScript tools, and maintenance of static websites.
 - **Conditional:** simple personal/portfolio sites when the client provides content and an agreed visual reference, and scope/revisions are bounded.
-- **Portfolio only for now:** self-developed Android apps and 9×9 projects, subject to verification and disclosure; do not sell custom Android development as a core service.
+- **Conditional Android service:** consider small, single-purpose Android utilities when screens, local/offline data, supported devices, revisions, installation and maintenance boundaries are agreed upfront. Android is not a core service. Showcase only verified self-developed Android work as portfolio evidence.
 - **Separate opportunity area:** domain partnerships, licensing/leasing, and transfers. Do not treat domain enquiries as a core web development service.
 - **Channels:** `khaibuilds.com` = public portfolio/contact; `github.com/khaibuilds` = inspectable technical evidence; Upwork link only when its exact URL has been verified.
 - **Commercial boundaries:** no fixed pricing, fixed completion times, unlimited revisions, guaranteed SEO results, or claims of verified client testimonials unless substantiated.
@@ -101,8 +101,8 @@ KhaiBuilds is the independent professional portfolio and inquiry channel for **s
 
 ### Android / Ứng dụng Android
 
-**EN:** Mention as independent product experiments on the Work page after factual and publication review; remove “custom Android apps” from the primary service catalogue.  
-**VI:** Chỉ giới thiệu như sản phẩm/thử nghiệm tự phát triển tại Work sau khi kiểm chứng và duyệt công bố; bỏ “ứng dụng Android theo yêu cầu” khỏi danh mục dịch vụ chính.
+**EN:** Offer small, single-purpose Android utilities **by selective inquiry**, especially offline/local-first checklists, calculators and notes. Confirm feature/screen count, device testing, data model, revision limit and handover before acceptance. Exclude sensitive data, complex cloud sync, accounts/payments, unbounded customization and any guarantee of Google Play approval. Google Play publishing, when requested, is scoped separately. Independently built Android projects may also be shown on Work only after factual and ownership review.  
+**VI:** Có thể nhận **có chọn lọc** các tiện ích Android một mục đích, ưu tiên offline/lưu dữ liệu cục bộ như checklist, tính toán, ghi chú. Trước khi nhận phải chốt số màn hình/chức năng, thiết bị kiểm thử, dữ liệu, số vòng sửa và bàn giao. Không nhận dữ liệu nhạy cảm, đồng bộ đám mây phức tạp, đăng nhập/thanh toán, tùy biến vô hạn; không cam kết được Google Play duyệt. Công việc phát hành Google Play cần thỏa thuận riêng. Các sản phẩm Android tự phát triển chỉ xuất hiện ở Work sau khi xác minh.
 
 ### Domains / Tên miền
 
@@ -111,7 +111,7 @@ KhaiBuilds is the independent professional portfolio and inquiry channel for **s
 
 ## 5. Content hierarchy and G5 implementation handoff
 
-1. **G5.2** — Apply approved copy to Home, Services, About and Contact in EN/VI, then update layout labels and old editorial assertions. Show three core services, place domains below or outside primary services, and remove custom Android service from public listings. Preserve the existing branding, visual system and working language routes. Retire or redirect outdated service URLs as appropriate.
+1. **G5.2** — Apply approved copy to Home, Services, About and Contact in EN/VI; update layout labels, inquiry subjects and obsolete CI editorial assertions. Show **three core web services** first, followed by **two conditional services (simple personal websites and small Android utilities)** on the Services page. Keep Domains as a separate opportunity area; preserve all existing service URLs and the current visual identity. Keep English default and Vietnamese parity.
 2. **G5.3** — Publish at most three verified self-developed projects with honest stage, purpose, implementation detail and authorized demonstration/source links. No false paid-client implication. Do not expose private code.
 3. **G5.4** — Update any CI checks currently tied to obsolete copy or route names; keep the Foundation verifier immutable, validate EN/VI parity, route generation, SEO, mobile, links, privacy/terms and contact flow. CI green is not proof of production success.
 4. **G5.5** — Present one consolidated PR for Owner approval, merge to protected main only after approval, and separately verify Cloudflare production deploy and actual browser behavior.
@@ -123,7 +123,7 @@ KhaiBuilds is the independent professional portfolio and inquiry channel for **s
 - [x] Independent web freelancer positioning explicitly defined.
 - [x] Single EN/VI message set recorded with commercial boundaries.
 - [x] Three core services defined, including examples, exclusions and acceptance criteria.
-- [x] Android and domains correctly separated from core web services.
+- [x] Android is explicitly a selective, bounded secondary service; domains remain a separate opportunity area.
 - [x] G5.2–G5.5 handoff and unchanged production guardrails documented.
 - [ ] Owner review of this baseline and later PR merge approval.
 - [ ] Public website update and technical QA (G5.2–G5.5, not claimed as completed here).
