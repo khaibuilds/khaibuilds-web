@@ -35,13 +35,17 @@ Production build: `npm run build` → `dist/`.
 
 - `src/pages/` — routes in English and Vietnamese
 - `src/layouts/` and `src/styles/` — layout and styling
-- `src/data/` — public-facing service/domain data and an empty, verified-project registry
+- `src/data/` — public-facing service/domain data and a reviewed, owner-approved self-developed project registry
 - `src/lib/` — content and contact helpers
 - `public/` — static assets, security headers, robots and sitemap
 - `.github/workflows/ci.yml` — build, source and artifact checks
 - `.github/foundation/` — SHA-pinned static-web quality verifier
 
 The domain catalogue is published as part of the website. It should not be interpreted as verified transfer availability or pricing. Privacy and terms pages must not be presented as finalized legal advice.
+
+## Selected project evidence
+
+The portfolio presents three **self-developed** projects, not paid client work: 9×9 Tools, KhaiBuilds Website and 9×9 LINK. Only the public KhaiBuilds Website repository is linked as source; the 9×9 repositories remain private. See `docs/g5-project-evidence.md` for source/deployment evidence and the remaining browser QA limitations.
 
 ## Quality and release
 
