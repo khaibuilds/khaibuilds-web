@@ -98,6 +98,7 @@ const contactAction = section === "domains" ? inquiryMailto("domain",locale) : s
           <p class="eyebrow">{page.eyebrow}</p>
           <h1 id={titleId}>{page.title}</h1>
           <p class="lead">{page.description}</p>
+          {section==="home" && <p class="brand-tagline">{locale==="en"?"Building ideas into digital assets.":"Biến ý tưởng thành tài sản số."}</p>}
           {section==="home" && <div class="hero-actions">
             <a class="button" href={inquiryMailto("general",locale)}>{locale==="en"?"Discuss a web task":"Trao đổi công việc web"} <span aria-hidden="true">↗</span></a>
             <a class="button ghost" href={hasFeaturedWork?pageHref("projects",locale):pageHref("services",locale)}>{hasFeaturedWork?t.seeWork:t.explore}</a>
