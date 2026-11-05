@@ -89,6 +89,23 @@ for (const prefix of languages) {
   const contact = read(join(dist, prefix + "contact/index.html"));
   assert.equal((home.match(/class="card portfolio-card"/g) || []).length, 3, "Home portfolio count: " + prefix);
   assert.equal((work.match(/class="card portfolio-card"/g) || []).length, 3, "Work portfolio count: " + prefix);
+  // G6: published Work entries must offer specific, bilingual implementation evidence.
+  assert.equal((work.match(/class="project-proof"/g) || []).length, 3,
+    "Missing implementation evidence in Work portfolio: " + prefix);
+  assert(work.includes(prefix ? "Điểm triển khai nổi bật" : "Implementation highlights"),
+    "Missing localized implementation evidence heading: " + prefix);
+  const about = read(join(dist, prefix + "about/index.html"));
+  assert(about.includes(prefix ? "Portfolio giới thiệu các sản phẩm web tự phát triển" : "My portfolio features self-developed web projects"),
+    "About positioning does not reflect deployed self-developed work: " + prefix);
+  assert(!about.includes("work in progress or practice"), "Outdated portfolio claim: " + prefix);
+  const serviceHub = read(join(dist, prefix + "services/index.html"));
+  for (const index of ["S1", "S2"]) {
+    assert(serviceHub.includes('class="card-number">' + index + '</span>'),
+      "Selective service numbering overlaps core services: " + prefix + index);
+  }
+  const personalSite = read(join(dist, prefix + "services/personal-websites/index.html"));
+  assert(personalSite.includes(prefix ? "Thiết kế giao diện tùy biến" : "Custom visual design without an agreed reference"),
+    "Personal-site scope must exclude unbounded visual design: " + prefix);
   assert(contact.includes("data-copy-email=") && contact.includes("mailto:hi@khaibuilds.com"),
     "Missing contact actions: " + prefix);
   assert(home.includes("mailto:hi@khaibuilds.com?subject="), "Missing scoped CTA: " + prefix);
@@ -97,5 +114,5 @@ for (const prefix of languages) {
 const langJS = read(join(dist, "lang.js"));
 assert(langJS.includes("navigator.clipboard.writeText") && langJS.includes("localStorage") && langJS.includes("sessionStorage"),
   "Language and clipboard controls missing");
-console.log("G5.4 static QA PASS: " + pages.length + " pages, " + entries.length +
+console.log("G5/G6 static QA PASS: " + pages.length + " pages, " + entries.length +
   " indexable routes, EN/VI SEO, all local links, accessibility landmarks, privacy and security checks.");
