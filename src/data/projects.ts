@@ -100,7 +100,7 @@ export function getPublicProjects(): PortfolioProject[] {
     slugs.add(p.slug);
     if (!p.published) continue;
     if (!p.ownerApproved || p.origin !== "self-developed") throw new Error("Unapproved or misattributed project: " + p.slug);
-    if (!/^\\d{4}-\\d{2}-\\d{2}$/.test(p.reviewedAt) || Number.isNaN(Date.parse(p.reviewedAt))) throw new Error("Invalid project review date: " + p.slug);
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(p.reviewedAt) || Number.isNaN(Date.parse(p.reviewedAt))) throw new Error("Invalid project review date: " + p.slug);
     if (!validStages.includes(p.stage) || !p.tags.length || p.tags.some(t => !validTags.includes(t))) throw new Error("Invalid project stage/tags: " + p.slug);
     for (const locale of ["en", "vi"] as const) {
       const item = p.locale[locale];
