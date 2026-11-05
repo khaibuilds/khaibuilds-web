@@ -1,5 +1,3 @@
-# Production: public pages may be indexed. Draft legal notices use per-page noindex.
+# Staging only. Never merge this branch into production main.
 User-agent: *
-Allow: /
-
-Sitemap: https://khaibuilds.com/sitemap.xml
+Disallow: /
