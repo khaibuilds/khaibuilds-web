@@ -1,3 +1,5 @@
+// Node-only static artifact verifier, executed by CI after the Foundation build.
+// @ts-nocheck
 import assert from "node:assert/strict";
 import { readFileSync, readdirSync, existsSync } from "node:fs";
 import { join, relative } from "node:path";
