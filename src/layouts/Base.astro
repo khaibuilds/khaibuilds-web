@@ -1,7 +1,7 @@
 ---
 import "../styles/global.css";
 import { content, pageHref, type Locale, type Section } from "../lib/copy";
-import { getPublicServices, getPublicService, serviceHref } from "../data/services";
+import { getPublicServices, getCoreServices, getConditionalServices, getPublicService, serviceHref } from "../data/services";
 import { getPublicProjects } from "../data/projects";
 import { getPublicDomains } from "../data/domains";
 import DomainCatalog from "../components/DomainCatalog.astro";
@@ -20,23 +20,21 @@ const menuKeys = ["services","projects","domains","about"] as const;
 const isService = Boolean(service);
 const showContactCta = isService || !["contact","privacy","terms","home"].includes(section);
 const publicServices = getPublicServices();
+const coreServices = getCoreServices();
+const conditionalServices = getConditionalServices();
 const portfolio = getPublicProjects();
 const domains = getPublicDomains();
-const cards = [
-  ...publicServices.map((s,i)=>({
-    href:serviceHref(s.slug,locale),index:String(i+1).padStart(2,"0"),
-    title:s.locales[locale].cardTitle,detail:s.locales[locale].cardDescription
-  })),
-  ...(section==="home" ? [{
-    href:pageHref("domains",locale),
-    index:String(publicServices.length+1).padStart(2,"0"),
-    title:locale==="en"?"Domain opportunities":"Cơ hội tên miền",
-    detail:locale==="en"?"Explore domain collaboration, leasing and transfer opportunities.":"Trao đổi hợp tác khai thác, cho thuê hoặc chuyển nhượng tên miền."
-  }] : [])
-];
+const cards = coreServices.map((item,i)=>({
+  href:serviceHref(item.slug,locale),index:String(i+1).padStart(2,"0"),
+  title:item.locales[locale].cardTitle,detail:item.locales[locale].cardDescription
+}));
+const conditionalCards = conditionalServices.map((item,i)=>({
+  href:serviceHref(item.slug,locale),index:String(i+1).padStart(2,"0"),
+  title:item.locales[locale].cardTitle,detail:item.locales[locale].cardDescription
+}));
 const titleId = "page-title";
 const hasFeaturedWork = portfolio.length > 0;
-const inquiryKind = service?.slug === "personal-websites" ? "website" : service?.slug === "android-apps" ? "android" : "general";
+const inquiryKind = service?.slug === "website-bug-fixes" ? "bugfix" : service?.slug === "javascript-tools" ? "javascript" : service?.slug === "static-site-maintenance" ? "maintenance" : service?.slug === "personal-websites" ? "website" : service?.slug === "android-apps" ? "android" : "general";
 const contactAction = section === "domains" ? inquiryMailto("domain",locale) : service ? inquiryMailto(inquiryKind,locale) : CONTACT_MAILTO;
 ---
 <!doctype html>
@@ -101,8 +99,8 @@ const contactAction = section === "domains" ? inquiryMailto("domain",locale) : s
           <h1 id={titleId}>{page.title}</h1>
           <p class="lead">{page.description}</p>
           {section==="home" && <div class="hero-actions">
-            <a class="button" href={hasFeaturedWork?pageHref("projects",locale):pageHref("services",locale)}>{hasFeaturedWork?t.seeWork:t.explore} <span aria-hidden="true">↗</span></a>
-            <a class="button ghost" href={hasFeaturedWork?pageHref("services",locale):pageHref("contact",locale)}>{hasFeaturedWork?t.explore:t.contact}</a>
+            <a class="button" href={inquiryMailto("general",locale)}>{locale==="en"?"Discuss a web task":"Trao đổi công việc web"} <span aria-hidden="true">↗</span></a>
+            <a class="button ghost" href={hasFeaturedWork?pageHref("projects",locale):pageHref("services",locale)}>{hasFeaturedWork?t.seeWork:t.explore}</a>
           </div>}
           {isService && <div class="hero-actions">
             <a class="button" href={contactAction}>{t.inquire} <span aria-hidden="true">↗</span></a>
@@ -113,13 +111,28 @@ const contactAction = section === "domains" ? inquiryMailto("domain",locale) : s
 
       {(section==="home" || section==="services") && !isService && <section class:list={["section",section==="home"?"section-home-offerings":""]} aria-labelledby="services-title">
         <div class="section-head">
-          <div><p class="eyebrow">{page.label}</p><h2 id="services-title">{section==="services"?(locale==="en"?"Websites & Android apps":"Website và ứng dụng Android"):t.whatWeDo}</h2></div>
+          <div><p class="eyebrow">{page.label}</p><h2 id="services-title">{t.whatWeDo}</h2></div>
         </div>
-        <div class:list={["cards",section==="services"?"cards-two":""]}>
+        <div class="cards">
           {cards.map((card)=><article class="card">
             <div class="card-top"><span class="card-number">{card.index}</span><span class="card-line" aria-hidden="true"></span></div>
             <h3>{card.title}</h3>
             <p>{card.detail}</p>
+            <a class="card-link" href={card.href}>{t.viewDetails}<span aria-hidden="true">↗</span></a>
+          </article>)}
+        </div>
+      </section>}
+
+      {section==="services" && !isService && conditionalCards.length > 0 && <section class="section" aria-labelledby="conditional-title">
+        <div class="section-head"><div>
+          <p class="eyebrow">{locale==="en"?"Selective requests":"Yêu cầu có chọn lọc"}</p>
+          <h2 id="conditional-title">{locale==="en"?"Other small projects I can consider":"Dự án nhỏ có thể xem xét thêm"}</h2>
+          <p>{locale==="en"?"Simple personal sites and Android utilities are considered only when features, revisions, testing and handover are clearly agreed.":"Website cá nhân và tiện ích Android nhỏ chỉ được nhận khi tính năng, số vòng sửa, kiểm thử và bàn giao đã thống nhất rõ ràng."}</p>
+        </div></div>
+        <div class="cards cards-two">
+          {conditionalCards.map((card)=><article class="card">
+            <div class="card-top"><span class="card-number">{card.index}</span><span class="card-line" aria-hidden="true"></span></div>
+            <h3>{card.title}</h3><p>{card.detail}</p>
             <a class="card-link" href={card.href}>{t.viewDetails}<span aria-hidden="true">↗</span></a>
           </article>)}
         </div>
@@ -187,13 +200,13 @@ const contactAction = section === "domains" ? inquiryMailto("domain",locale) : s
 
       {(section==="home" || (section==="services" && !isService)) && <section class="section-bottom" aria-labelledby="end-title">
         <p class="eyebrow">{section==="home"
-          ?(locale==="en"?"Have an idea?":"Có ý tưởng?")
+          ?(locale==="en"?"Web task inquiry":"Trao đổi công việc web")
           :(locale==="en"?"Service inquiry":"Yêu cầu dịch vụ")}</p>
         <h2 id="end-title">{section==="home"
-          ?(locale==="en"?"Have a project in mind?":"Bạn có ý tưởng muốn thực hiện?")
-          :(locale==="en"?"Have a website or Android app in mind?":"Bạn cần website hay ứng dụng Android?")}</h2>
+          ?(locale==="en"?"Need help with a specific web task?":"Bạn cần hỗ trợ công việc web cụ thể?")
+          :(locale==="en"?"Have a task with a clear scope?":"Bạn có công việc đã rõ phạm vi?")}</h2>
         <p>{section==="home"
-          ?(locale==="en"?"Share your idea by email, and let’s explore what could work.":"Hãy chia sẻ nhu cầu qua email để cùng tìm hướng triển khai phù hợp.")
+          ?(locale==="en"?"Describe the issue or result you need, and we can discuss scope and next steps.":"Mô tả lỗi hoặc kết quả bạn cần để trao đổi phạm vi và bước tiếp theo.")
           :(locale==="en"?"Send a short outline by email. Scope, timing and cost can be discussed before starting.":"Gửi mô tả ngắn qua email để trao đổi phạm vi, thời gian và chi phí trước khi bắt đầu.")}</p>
         <a class="button ghost" href={inquiryMailto("general",locale)}>{locale==="en"?"Email KhaiBuilds":"Gửi email"} ↗</a>
       </section>}
