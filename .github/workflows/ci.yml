@@ -220,6 +220,32 @@ jobs:
           assert(readFileSync("dist/vi/services/android-apps/index.html","utf8").includes("có chọn lọc"));
           NODE
 
+      - name: G5.3 QA — three attributed projects with safe public links
+        run: |
+          node --input-type=module <<'NODE'
+          import { readFileSync } from "node:fs";
+          import assert from "node:assert/strict";
+          const demos = ["https://tools.9x9.vn/","https://khaibuilds.com/","https://link.9x9.vn/"];
+          const publicSource = "https://github.com/khaibuilds/khaibuilds-web";
+          for (const prefix of ["", "vi/"]) {
+            const home = readFileSync(`dist/${prefix}index.html`, "utf8");
+            const work = readFileSync(`dist/${prefix}projects/index.html`, "utf8");
+            for (const [name,html] of [["home",home],["work",work]]) {
+              assert.equal((html.match(/class="card portfolio-card"/g) || []).length, 3, `Expected three portfolio cards in ${prefix}${name}`);
+              assert.equal((html.match(/class="project-meta"/g) || []).length, 3, `Missing project origin labels: ${prefix}${name}`);
+              for (const url of demos) assert(html.includes(`href="${url}"`), `Missing verified product link ${url} on ${prefix}${name}`);
+              assert(html.includes(`href="${publicSource}"`), `Missing public-source link: ${prefix}${name}`);
+              assert(!html.includes("github.com/9x9vn/link-9x9"), "Private 9x9 LINK repository leaked");
+              assert(!html.includes("github.com/9x9vn/9x9-tools"), "Private 9x9 Tools repository leaked");
+              assert(html.includes('rel="noopener noreferrer"'), `External-link protection missing: ${prefix}${name}`);
+              assert(!html.includes("portfolio-empty"), `Empty portfolio placeholder leaked: ${prefix}${name}`);
+            }
+            assert(work.includes(prefix ? "Tự phát triển" : "Self-developed"));
+            assert(work.includes(prefix ? "không phải dự án khách hàng trả phí" : "not paid client commissions"));
+            assert(!work.includes("client testimonials") || work.includes("not paid client commissions"));
+          }
+          NODE
+
       - name: Verify homepage and Services information architecture v1.3.2
         run: |
           node --input-type=module <<'NODE'
