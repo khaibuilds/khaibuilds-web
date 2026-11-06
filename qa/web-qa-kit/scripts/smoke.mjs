@@ -18,6 +18,7 @@ try {
   assert(findings.includes('runtime-errors'),'Missed intended JavaScript error');
   assert(findings.includes('h1'),'Missed duplicate H1');
   assert(findings.includes('horizontal-overflow'),'Missed horizontal overflow');
+  assert(findings.includes('external-requests'),'Missed blocked external request');
   console.log('PASS: 4 healthy viewport checks passed; 2 intentionally broken checks failed.');
 } finally {
   await new Promise(ok=>server.close(ok));
