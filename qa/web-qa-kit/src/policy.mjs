@@ -1,3 +1,4 @@
+// @ts-nocheck — standalone Node browser QA package; checked by its own tests/CI.
 /** Security boundaries: only a small, explicitly listed local site. */
 export const DEFAULT_VIEWPORTS = Object.freeze({
   mobile: {width: 390, height: 844}, desktop: {width: 1365, height: 768},
