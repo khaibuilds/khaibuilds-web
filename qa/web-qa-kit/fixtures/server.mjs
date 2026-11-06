@@ -1,3 +1,4 @@
+// @ts-nocheck — standalone Node browser QA package; checked by its own tests/CI.
 import {createServer} from 'node:http';
 import {readFile} from 'node:fs/promises';
 const root = new URL('./site/', import.meta.url);
