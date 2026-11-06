@@ -1,5 +1,5 @@
-// @ts-nocheck — standalone Node browser QA package; checked by its own tests/CI.
 #!/usr/bin/env node
+// @ts-nocheck — standalone Node browser QA package; checked by its own tests/CI.
 import {readFile} from 'node:fs/promises';
 import {resolve} from 'node:path';
 import {parseConfig} from '../src/policy.mjs';
