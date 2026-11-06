@@ -1,60 +1,55 @@
 # KhaiBuilds — Portfolio Website
 
-A responsive, bilingual (English/Vietnamese) website for KhaiBuilds, an independent digital project and services portfolio.
+A responsive, bilingual (English/Vietnamese) **self-developed** portfolio built with Astro and TypeScript.
 
-**Live website:** https://khaibuilds.com
+**Live demo:** https://khaibuilds.com/  
+**Public source:** https://github.com/khaibuilds/khaibuilds-web  
+**Technical case study:** [Problem, implementation, verification and limitations](docs/khaibuilds-web-case-study.md)
 
-This is a self-developed portfolio example, **not a paid client project**. The repository demonstrates implementation and verification practices; it does not imply any unverified client outcomes.
+This is **not a paid client project**. The repository demonstrates source organization and repeatable checks, not unverified client outcomes.
 
 ## What it demonstrates
 
-- Static, responsive pages using Astro and TypeScript
-- English at `/`, Vietnamese at `/vi/`
-- Clearly scoped service pages and data-driven page content
-- Semantic HTML, accessibility checks, technical SEO, sitemap and metadata
-- Reproducible builds and CI checks using a SHA-pinned 9×9 Foundation static-web verifier
+- English at `/` and Vietnamese at `/vi/`.
+- Static responsive pages with separated routes, layouts and content.
+- Explicit attribution of showcased projects as self-developed.
+- Technical SEO basics, static QA, and protected external links.
+- GitHub Actions, reproducible dependency installation and a SHA-pinned 9×9 Foundation verifier.
 
-## Technology
+## Run and verify locally
 
-Astro · TypeScript · CSS · GitHub Actions · Cloudflare Pages
-
-## Run locally
-
-Requires Node.js 22.12 or later.
+**Stack:** Astro · TypeScript · CSS · GitHub Actions · Cloudflare Pages  
+**Requirement:** Node.js 22.12 or newer.
 
 ```sh
 npm ci
 npm run check
 npm run build
+node scripts/g5-qa.mjs
 npm run dev
 ```
 
-Production build: `npm run build` → `dist/`.
+`npm run build` writes the static site to `dist/`. Run `g5-qa.mjs` **after** building; it validates generated output.
 
-## Project structure
+## Where to look
 
-- `src/pages/` — routes in English and Vietnamese
-- `src/layouts/` and `src/styles/` — layout and styling
-- `src/data/` — public-facing service/domain data and a reviewed, owner-approved self-developed project registry
-- `src/lib/` — content and contact helpers
-- `public/` — static assets, security headers, robots and sitemap
-- `.github/workflows/ci.yml` — build, source and artifact checks
-- `.github/foundation/` — SHA-pinned static-web quality verifier
+- `src/pages/` — English and Vietnamese routes.
+- `src/layouts/`, `src/styles/` — shared layout and styling.
+- `src/data/projects.ts` — verified portfolio attribution and deliberately public links.
+- `.github/workflows/ci.yml` — dependency, source, build and static QA checks.
+- `.github/foundation/` — pinned static-site verification.
+- `scripts/g5-qa.mjs` — static build-output QA.
+- `docs/khaibuilds-web-case-study.md` — reproducible evidence and trade-offs.
+- `docs/g5-project-evidence.md` — public-safe showcase attribution.
 
-The domain catalogue is published as part of the website. It should not be interpreted as verified transfer availability or pricing. Privacy and terms pages must not be presented as finalized legal advice.
+## Quality and release boundaries
 
-## Selected project evidence
+CI indicates whether the source and generated pages satisfy the configured checks. It does **not** prove production deployment, cross-device browser QA, uptime or complete accessibility compliance.
 
-The portfolio presents three **self-developed** projects, not paid client work: 9×9 Tools, KhaiBuilds Website and 9×9 LINK. Only the public KhaiBuilds Website repository is linked as source; the 9×9 repositories remain private. See `docs/g5-project-evidence.md` for source/deployment evidence and the remaining browser QA limitations.
+The showcased 9×9 products are **self-developed**, not paid commissions. Their private source remains private. Changes to `main` and production release require separate approval and post-release verification.
 
-## Quality and release
+## Contact and reuse
 
-CI is evidence of a successful code check, **not** evidence that a Cloudflare production release or browser-level QA has passed. Production deployment is managed separately and requires approval and post-release checks.
+**Contact:** hi@khaibuilds.com
 
-## Contact
-
-hi@khaibuilds.com
-
-## Reuse
-
-No open-source license is granted by this repository unless an explicit license is published. Third-party dependencies retain their respective licenses.
+No open-source license is granted for this repository unless one is explicitly published. Third-party dependencies retain their own license terms.
