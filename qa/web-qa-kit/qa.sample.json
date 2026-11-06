@@ -1,0 +1,18 @@
+{
+  "baseUrl": "http://127.0.0.1:4173",
+  "routes": [
+    "/",
+    "/about/"
+  ],
+  "outputDir": "reports",
+  "viewports": {
+    "mobile": {
+      "width": 390,
+      "height": 844
+    },
+    "desktop": {
+      "width": 1365,
+      "height": 768
+    }
+  }
+}
