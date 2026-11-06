@@ -1,3 +1,4 @@
+// @ts-nocheck — standalone Node browser QA package; checked by its own tests/CI.
 import assert from 'node:assert/strict';
 import {fileURLToPath} from 'node:url';
 import {dirname,resolve} from 'node:path';
