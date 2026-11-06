@@ -1,3 +1,4 @@
+// @ts-nocheck — standalone Node browser QA package; checked by its own tests/CI.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {parseConfig, assessPage} from '../src/policy.mjs';
