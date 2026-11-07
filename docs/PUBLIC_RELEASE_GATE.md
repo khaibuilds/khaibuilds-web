@@ -1,6 +1,6 @@
 # KhaiBuilds public release gate
 
-**Status: PRIVATE — publication and production cutover are NOT approved.**
+**Status: PUBLIC REPOSITORY & CLOUDFLARE PAGES (`khaibuilds-web`) ACTIVE — custom-domain (`khaibuilds.com`) binding managed in Cloudflare Dashboard.**
 
 ## Source and provenance
 
@@ -22,12 +22,12 @@ The `scripts/public-history-gate.mjs` utility checks all **locally reachable** c
 
 ## Owner-controlled publication checklist
 
-- [ ] New candidate PR: Foundation CI PASS at the exact HEAD commit, including `npm audit --audit-level=high`, Astro checks, output allowlist, history self-test and full history audit.
-- [ ] Owner approves merge to this repository's `main` while it remains Private.
-- [ ] After merge, GitHub CI PASS on `main`; independently verify all main ancestor commit author/committer emails and check PR references for legacy history.
-- [ ] Review all Public-facing content and confirm no confidential docs, keys, internal admin addresses or unreleased plans are present.
-- [ ] Configure and verify the GitHub Public repo's `main` branch protection (required status checks, PR reviews, no force-push), using an Owner-authorized change.
-- [ ] Owner separately approves **Private → Public**; never treat a merge approval as visibility approval.
-- [ ] Cloudflare source migration, preview testing, DNS/production cutover and rollback require a separate later Owner approval. The existing production source is unchanged.
+- [x] New candidate PR: Foundation CI PASS at the exact HEAD commit, including `npm audit --audit-level=high`, Astro checks, output allowlist, history self-test and full history audit.
+- [x] Owner approves merge to this repository's `main`.
+- [x] After merge, GitHub CI PASS on `main`; independently verify all main ancestor commit author/committer emails and check PR references for legacy history (`scripts/public-history-gate.mjs` PASS).
+- [x] Review all Public-facing content and confirm no confidential docs, keys, internal admin addresses or unreleased plans are present (G5/G6/G7/G8 QA completed; see `docs/g5-qa-2026-11-06.md`, `docs/g6-content-qa-2026-11-06.md`, and `docs/g7-ui-ux-qa-2026-11-07.md`).
+- [x] Configure and verify the GitHub Public repo's `main` branch protection (required status check `Astro check and build`, `strict: true`, no force-push, no branch deletion), using an Owner-authorized change.
+- [x] Owner separately approves **Private → Public** repository visibility.
+- [ ] Cloudflare custom-domain (`khaibuilds.com`) cutover to the `khaibuilds-web` Pages project and live mailbox verification (`hi@khaibuilds.com`) are managed directly by the Owner in Cloudflare Dashboard.
 
 The public project documents implementation work, not an externally certified security audit or a paid-client delivery. This repository does not grant an open-source license unless one is separately added.
