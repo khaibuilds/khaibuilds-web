@@ -135,6 +135,11 @@ for (const prefix of languages) {
   const domainsPage = read(join(dist, prefix + "domains/index.html"));
   assert(/\.collaboration-name\[[^\]]+\]:before\{/.test(domainsPage),
     "Missing collaboration domain indicator style: " + prefix);
+  for (const legalRoute of drafts) {
+    const legalHtml = read(join(dist, prefix + legalRoute + "/index.html"));
+    assert(!legalHtml.includes("· draft") && !legalHtml.includes("· bản nháp"),
+      "Draft marker still present on finalized legal page: " + prefix + legalRoute);
+  }
 }
 const cssBundle = allFiles(dist).filter(file => file.endsWith(".css")).map(read).join("\n");
 assert(/\.card-link\{[^}]*min-height:40px/.test(cssBundle) && cssBundle.includes(".mobile-sublink"),
@@ -142,5 +147,5 @@ assert(/\.card-link\{[^}]*min-height:40px/.test(cssBundle) && cssBundle.includes
 const langJS = read(join(dist, "lang.js"));
 assert(langJS.includes("navigator.clipboard.writeText") && langJS.includes("localStorage") && langJS.includes("sessionStorage"),
   "Language and clipboard controls missing");
-console.log("G5/G6 static QA PASS: " + pages.length + " pages, " + entries.length +
-  " indexable routes, EN/VI SEO, all local links, no orphan routes, mobile nav hierarchy, accessibility landmarks, privacy and security checks.");
+console.log("G5/G6/G7/G8 static QA PASS: " + pages.length + " pages, " + entries.length +
+  " indexable routes, EN/VI SEO, all local links, no orphan routes, mobile nav hierarchy, finalized legal notices, accessibility landmarks, privacy and security checks.");
