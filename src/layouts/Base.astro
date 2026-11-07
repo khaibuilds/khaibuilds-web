@@ -77,9 +77,9 @@ const contactAction = section === "domains" ? inquiryMailto("domain",locale) : s
         <details class="mobile-nav">
           <summary aria-label={locale==="vi"?"Mở menu":"Open menu"}><span aria-hidden="true">☰</span></summary>
           <nav class="mobile-links" aria-label={locale==="vi"?"Menu di động":"Mobile navigation"}>
-            {menuKeys.map((key)=><a href={pageHref(key,locale)} aria-current={(section===key || (key==="services"&&isService))?"page":undefined}>{t.nav[key]}</a>)}
-            {publicServices.map((item)=><a href={serviceHref(item.slug,locale)}>{item.locales[locale].cardTitle}</a>)}
-            <a class="mobile-contact" href={pageHref("contact",locale)}>{t.contact} ↗</a>
+            {menuKeys.map((key)=><a href={pageHref(key,locale)} aria-current={section===key && !isService ? "page" : (key==="services" && isService) ? "true" : undefined}>{t.nav[key]}</a>)}
+            {publicServices.map((item,i)=><a class:list={["mobile-sublink",i===0&&"mobile-sublink-first"]} href={serviceHref(item.slug,locale)} aria-current={service?.slug===item.slug?"page":undefined}>{item.locales[locale].cardTitle}</a>)}
+            <a class="mobile-contact" href={pageHref("contact",locale)} aria-current={section==="contact"?"page":undefined}>{t.contact} ↗</a>
           </nav>
         </details>
       </div>
@@ -170,6 +170,9 @@ const contactAction = section === "domains" ? inquiryMailto("domain",locale) : s
             <div><strong>{locale==="en"?"No domains listed yet":"Chưa có tên miền được công khai"}</strong>
             <p>{locale==="en"?"Email KhaiBuilds to discuss a domain idea or proposal.":"Gửi email nếu bạn muốn trao đổi về một tên miền hoặc đề xuất hợp tác."}</p></div>
           </div>}
+          {(section==="about" || section==="domains") && <p class="supporting-copy">
+            <a class="card-link" href={pageHref("collaborate",locale)}>{locale==="en"?"Read collaboration guidelines":"Xem nguyên tắc đề xuất hợp tác"} <span aria-hidden="true">↗</span></a>
+          </p>}
           {section==="projects" && portfolio.length>0 && <PortfolioCards projects={portfolio} locale={locale} variant="list" />}
           {section==="projects" && portfolio.length===0 && <div class="empty-note" role="status">
             <span aria-hidden="true">◫</span>
@@ -203,7 +206,7 @@ const contactAction = section === "domains" ? inquiryMailto("domain",locale) : s
         <p>{section==="home"
           ?(locale==="en"?"Describe the issue or result you need, and we can discuss scope and next steps.":"Mô tả lỗi hoặc kết quả bạn cần để trao đổi phạm vi và bước tiếp theo.")
           :(locale==="en"?"Send a short outline by email. Scope, timing and cost can be discussed before starting.":"Gửi mô tả ngắn qua email để trao đổi phạm vi, thời gian và chi phí trước khi bắt đầu.")}</p>
-        <a class="button ghost" href={inquiryMailto("general",locale)}>{locale==="en"?"Email KhaiBuilds":"Gửi email"} ↗</a>
+        <a class="button" href={inquiryMailto("general",locale)}>{locale==="en"?"Email KhaiBuilds":"Gửi email"} ↗</a>
       </section>}
     </div>
   </main>

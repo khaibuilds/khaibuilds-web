@@ -23,6 +23,7 @@ function allFiles(dir) {
 const fileFor = pathname => join(dist, pathname.endsWith("/") ? pathname + "index.html" : pathname);
 const expectedPages = new Set();
 const expectedSitemap = new Set();
+const inboundAnchorLinks = new Set();
 
 for (const prefix of languages) {
   for (const route of [...routes, ...drafts]) {
@@ -60,12 +61,33 @@ for (const prefix of languages) {
       const pathname = new URL(href, site).pathname;
       assert(existsSync(fileFor(pathname)), "Broken local link: " + path + " -> " + href);
     }
+    for (const match of html.matchAll(/<a\b[^>]*\bhref="([^"]+)"/g)) {
+      const href = match[1].replaceAll("&amp;", "&");
+      if (href.startsWith("/") || href.startsWith(site)) {
+        const pathname = new URL(href, site).pathname;
+        if (pathname !== path) inboundAnchorLinks.add(pathname);
+      }
+    }
+    if (route.startsWith("services/")) {
+      const mobileNav = html.split('class="mobile-links"')[1]?.split("</nav>")[0] || "";
+      assert(mobileNav.includes('href="/' + prefix + 'services/" aria-current="true"'),
+        "Missing parent service state in mobile nav: " + path);
+      assert(mobileNav.includes('href="' + path + '" aria-current="page"'),
+        "Missing active service sublink state in mobile nav: " + path);
+    }
     for (const a of html.matchAll(/<a\b[^>]*target="_blank"[^>]*>/g)) {
       assert(/rel="[^"]*noopener[^"]*"/.test(a[0]) && /rel="[^"]*noreferrer[^"]*"/.test(a[0]),
         "Unsafe external new-tab link: " + path);
     }
     assert(!html.includes("github.com/9x9vn/link-9x9") && !html.includes("github.com/9x9vn/9x9-tools"),
       "Private source link leaked: " + path);
+  }
+}
+
+for (const prefix of languages) {
+  for (const route of [...routes, ...drafts]) {
+    const path = "/" + prefix + (route ? route + "/" : "");
+    assert(inboundAnchorLinks.has(path), "Orphan route with no inbound anchor link: " + path);
   }
 }
 
@@ -110,9 +132,15 @@ for (const prefix of languages) {
     "Missing contact actions: " + prefix);
   assert(home.includes("mailto:hi@khaibuilds.com?subject="), "Missing scoped CTA: " + prefix);
   assert(!/<form\b/.test(contact), "Unexpected personal-data form: " + prefix);
+  const domainsPage = read(join(dist, prefix + "domains/index.html"));
+  assert(/\.collaboration-name\[[^\]]+\]:before\{/.test(domainsPage),
+    "Missing collaboration domain indicator style: " + prefix);
 }
+const cssBundle = allFiles(dist).filter(file => file.endsWith(".css")).map(read).join("\n");
+assert(/\.card-link\{[^}]*min-height:40px/.test(cssBundle) && cssBundle.includes(".mobile-sublink"),
+  "Missing UI/UX CSS regression markers in CSS bundle");
 const langJS = read(join(dist, "lang.js"));
 assert(langJS.includes("navigator.clipboard.writeText") && langJS.includes("localStorage") && langJS.includes("sessionStorage"),
   "Language and clipboard controls missing");
 console.log("G5/G6 static QA PASS: " + pages.length + " pages, " + entries.length +
-  " indexable routes, EN/VI SEO, all local links, accessibility landmarks, privacy and security checks.");
+  " indexable routes, EN/VI SEO, all local links, no orphan routes, mobile nav hierarchy, accessibility landmarks, privacy and security checks.");
