@@ -40,7 +40,7 @@ const publicServices = getPublicServices();
           <summary aria-label="Open menu"><span aria-hidden="true">☰</span></summary>
           <nav class="mobile-links" aria-label="Mobile navigation">
             {menuKeys.map((key) => <a href={pageHref(key, "en")}>{t.nav[key]}</a>)}
-            {publicServices.map((item) => <a href={serviceHref(item.slug, "en")}>{item.locales.en.cardTitle}</a>)}
+            {publicServices.map((item, i) => <a class:list={["mobile-sublink", i===0 && "mobile-sublink-first"]} href={serviceHref(item.slug, "en")}>{item.locales.en.cardTitle}</a>)}
             <a class="mobile-contact" href="/contact/">{t.contact} ↗</a>
           </nav>
         </details>
